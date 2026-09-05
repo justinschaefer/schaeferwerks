@@ -1,0 +1,15 @@
+{
+  "name": "GPX Route Explorer",
+  "short_name": "Route Explorer",
+  "description": "Offline-capable trail maps, 3D terrain, and route comparison.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#faf9f6",
+  "theme_color": "#1e3a2f",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

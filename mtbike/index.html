@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPX Route Explorer</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3a2f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Route Explorer">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="leaflet.min.css">
+<style>
+  :root {
+    /* Slight warm off-white instead of pure white -- easier on the eyes for
+       long sessions and reads less like a bare template, without going far
+       enough to hurt contrast or clash with map tile colors. --card and
+       --border are nudged the same warm direction so the sidebar/panels
+       still read as a visible step darker than the page, not just "gray on
+       white" turned "gray on cream" by accident. */
+    --bg: #faf9f6;
+    --card: #f2f0ea;
+    --border: #e3ded3;
+    --text: #111827;
+    --text2: #4b5563;
+    --text3: #9ca3af;
+    --accent: #2563eb;
+    --green: #16a34a;
+    --red: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  #app { display: flex; height: 100%; }
+
+  #sidebar h2 { font-size: 14px; font-weight: 500; margin: 0 0 10px; color: var(--text2); }
+  #routeList { list-style: none; margin: 0; padding: 0; }
+  #routeList li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  #routeList li:hover { background: var(--card); }
+  #routeList li.active { background: var(--accent); color: #fff; }
+  /* min-width:0 is the flexbox escape hatch: without it a flex child never
+     shrinks below its content's intrinsic width, so a long unbroken filename
+     just pushes past the sidebar edge instead of the ellipsis below ever
+     getting a chance to kick in. */
+  #routeList li .info { min-width: 0; flex: 1 1 auto; }
+  #routeList li .fname {
+    font-weight: 400;
+    font-size: 12px;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #routeList li .fmeta { font-size: 11px; opacity: 0.8; display: block; margin-top: 2px; }
+  #routeList li .route-btns { flex: 0 0 auto; display: flex; align-items: center; }
+  #routeList li .route-del-btn,
+  #routeList li .route-rename-btn {
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    font-size: 13px;
+    line-height: 1;
+    color: inherit;
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+  #routeList li .route-del-btn { font-size: 15px; }
+  #routeList li .route-del-btn:hover,
+  #routeList li .route-rename-btn:hover { opacity: 1; }
+  #routeList li .fname-input {
+    font: inherit;
+    font-weight: 400;
+    font-size: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 4px;
+    padding: 1px 4px;
+    background: rgba(255,255,255,0.15);
+    color: inherit;
+  }
+  #routeList li.active .fname-input { color: #fff; }
+  #routeList li:not(.active) .fname-input { border-color: var(--border); background: #fff; }
+  #routeList .empty-hint { font-size: 12px; color: var(--text3); }
+  #routeList .route-group-header {
+    display: block;
+    cursor: default;
+    padding: 14px 10px 4px;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  #routeList .route-group-header:first-child { padding-top: 2px; }
+  #routeList .route-group-header:hover { background: none; }
+  #routeList .route-group-count {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    opacity: 0.75;
+  }
+
+  #openBtn {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    cursor: pointer;
+    margin-bottom: 14px;
+  }
+  #openBtn:hover { background: #efefec; }
+
+  #main {
+    flex: 1;
+    display: flex; flex-direction: column; min-height: 0;
+    position: relative;
+    padding: 24px 28px;
+    overflow-y: auto;
+  }
+
+  #dropOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(37, 99, 235, 0.08);
+    border: 3px dashed var(--accent);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--accent);
+    z-index: 999;
+    pointer-events: none;
+  }
+  #dropOverlay.show { display: flex; }
+
+  .search-bar { display: flex; gap: 8px; margin-bottom: 18px; max-width: 480px; }
+  .search-bar input {
+    flex: 1;
+    padding: 9px 12px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .search-bar button {
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    cursor: pointer;
+  }
+  .search-bar button:hover { background: #efefec; }
+
+  h1 { font-size: 1.3rem; font-weight: 500; margin: 0 0 4px; }
+  /* #rTitle reuses <h1> for the "Explore the map" page heading, but doubles as
+     the active route's name display once a route is loaded -- a filename isn't
+     a page title and doesn't need page-title-sized text eating vertical space
+     above the map on every load. */
+  #rTitle { font-size: 15px; font-weight: 600; }
+  .subtitle { color: var(--text2); font-size: 0.9rem; margin: 0 0 18px; }
+  .layout { display: flex; gap: 20px; align-items: stretch; flex: 1; min-height: 0; }
+  .map-card { flex: 1 1 480px; min-width: 320px; display: flex; flex-direction: column; min-height: 0; }
+  #viewportToolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; flex: 0 0 auto; }
+  #viewModeSwitch { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  #viewModeSwitch button {
+    padding: 6px 14px; font-size: 13px; font-weight: 500; border: none; background: var(--card);
+    cursor: pointer; color: var(--text2);
+  }
+  #viewModeSwitch button + button { border-left: 1px solid var(--border); }
+  #viewModeSwitch button.active { background: var(--accent); color: #fff; }
+  #viewModeSwitch button:hover:not(.active) { background: #efefec; }
+  #mapWrap {
+    width: 100%; flex: 1 1 auto; min-height: 300px;
+    max-width: 100%;
+    resize: vertical; overflow: hidden;
+    border-radius: 12px; border: 1px solid var(--border);
+    position: relative;
+  }
+  #panel3d { width: 100%; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  #panel3d #iso3dContainer { flex: 1 1 auto; min-height: 300px; }
+  #mapDiv { width: 100%; height: 100%; background: #eee; }
+  #mapDiv:fullscreen { width: 100vw; height: 100vh; border-radius: 0; border: none; }
+  #mapDiv:-webkit-full-screen { width: 100vw; height: 100vh; border-radius: 0; border: none; }
+  #mapDiv:-moz-full-screen { width: 100vw; height: 100vh; border-radius: 0; border: none; }
+  /* CSS-only "maximize" fallback for browsers (notably iPhone Safari) where the native
+     Fullscreen API doesn't work on non-video elements. !important on position is required
+     here specifically: Leaflet sets style="position: relative" as an INLINE style on its
+     own container element at init, and inline styles beat stylesheet rules regardless of
+     selector specificity -- confirmed directly on real WebKit (iPhone Safari's engine),
+     not assumed -- so without !important this whole fallback silently no-ops on exactly
+     the browser it exists for. */
+  #mapDiv.js-maximized {
+    position: fixed !important; inset: 0; width: 100vw; height: 100vh;
+    z-index: 9999; border-radius: 0; border: none;
+  }
+  body.has-js-maximized { overflow: hidden; }
+
+  /* Pinned to the top rather than the bottom corner where the recenter button
+     lives -- this isn't urgent or safety-related, just a low-priority nudge.
+     Centering via an inert full-width flex shell (rather than the more usual
+     left:50%+transform:translateX(-50%) on the visible element itself) sidesteps
+     a position:fixed + transform rendering quirk seen in headless/automated
+     screenshot capture -- this way nothing with a transform is also fixed. */
+  #updateBanner {
+    position: fixed; top: max(10px, env(safe-area-inset-top)); left: 0; right: 0;
+    z-index: 1020; display: none; justify-content: center; pointer-events: none;
+  }
+  #updateBanner.show { display: flex; }
+  #updateBanner .update-pill {
+    background: rgba(17,24,39,0.95); color: #fff;
+    padding: 8px 10px 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 500;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    display: flex; align-items: center; gap: 10px; max-width: 92vw;
+    pointer-events: auto;
+  }
+  #updateBanner button {
+    background: #fff; color: #111827; border: none; border-radius: 999px;
+    padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  }
+  #updateBanner .update-dismiss {
+    background: none; color: #fff; opacity: 0.6; padding: 5px 6px; font-size: 15px; line-height: 1;
+  }
+  #recenterBtn {
+    position: fixed; right: 14px; bottom: max(14px, env(safe-area-inset-bottom));
+    z-index: 500; background: var(--accent); color: #fff; border: none;
+    padding: 8px 14px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3); cursor: pointer;
+  }
+  .legend { display: flex; gap: 16px; margin-top: 8px; font-size: 12px; color: var(--text2); flex-wrap: wrap; flex: 0 0 auto; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+
+  .panel { }
+  .slider-block { margin-bottom: 16px; }
+  .slider-block label { font-size: 13px; color: var(--text2); display: block; margin-bottom: 4px; }
+  .slider-block .val { font-weight: 500; color: var(--text); }
+  input[type=range] { width: 100%; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .stat { background: var(--card); border-radius: 8px; padding: 12px; overflow: hidden; }
+  .stat p:first-child { font-size: 11px; color: var(--text2); margin: 0 0 4px; }
+  .stat p:last-child { font-size: 16px; font-weight: 500; margin: 0; overflow-wrap: break-word; }
+  .note { font-size: 12px; color: var(--text3); margin-top: 14px; }
+  .panel-empty { color: var(--text3); font-size: 13px; padding: 20px 0; }
+
+  .chart-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .chart-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .chart-card-head h3 { font-size: 14px; font-weight: 600; margin: 0; color: var(--text); }
+  .chart-clear-btn {
+    background: none; border: none; padding: 0; font-size: 12px; color: var(--accent);
+    cursor: pointer; text-decoration: underline;
+  }
+  .chart-hint { font-size: 12px; color: var(--text3); margin: 4px 0 12px; }
+  .chart-wrap { position: relative; width: 100%; margin-top: 4px; touch-action: none; user-select: none; }
+  .chart-svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .chart-svg .chart-fill { fill-opacity: 0.55; }
+  .chart-svg .chart-line { fill: none; stroke-width: 2; }
+  .chart-svg .chart-gridline { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 3; }
+  .chart-svg .chart-baseline { stroke: var(--border); stroke-width: 1; }
+  .chart-svg .chart-axis-label { font-size: 10px; fill: var(--text3); }
+  .chart-svg .chart-selection { fill: var(--accent); fill-opacity: 0.08; }
+  .chart-svg .chart-guide { stroke: var(--text); stroke-width: 1; }
+  .chart-svg .chart-guide-dot { fill: var(--text); }
+  .chart-svg .chart-badge-ring { fill: #fff; stroke-width: 2; }
+  .chart-svg .chart-badge-text { font-size: 9px; font-weight: 700; fill: #fff; text-anchor: middle; dominant-baseline: central; }
+  .chart-svg .chart-handle-guide { stroke-width: 2; stroke-dasharray: 3 3; opacity: 0.55; }
+  .chart-svg .chart-handle-hit { fill: transparent; }
+  .chart-tooltip {
+    position: absolute; pointer-events: none; display: none;
+    background: #fff; border: 1px solid var(--border); border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    padding: 8px 12px; font-size: 12px; white-space: nowrap; z-index: 5;
+    top: 8px;
+  }
+  .chart-tooltip .tt-row { display: flex; gap: 14px; justify-content: space-between; }
+  .chart-tooltip .tt-row + .tt-row { margin-top: 3px; }
+  .chart-tooltip .tt-label { color: var(--text2); font-weight: 600; }
+  .chart-tooltip .tt-val { color: var(--text); }
+
+  .chart-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .chart-stats-3 { grid-template-columns: repeat(3, 1fr); }
+  .chart-stat p { margin: 0; font-size: 20px; font-weight: 700; color: var(--text); }
+  .chart-stat span { display: block; font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  #rightPanelTabs { display: flex; gap: 6px; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
+  #rightPanelTabs button {
+    padding: 8px 4px; font-size: 13px; font-weight: 500; border: none; background: none;
+    color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  #rightPanelTabs button.active { color: var(--text); border-bottom-color: var(--accent); }
+  #rightPanelTabs button:hover:not(.active) { color: var(--text2); }
+  #compareTabContent .cmp-table-wrap { overflow-x: auto; }
+  /* Reserve room for the fixed .cmp-selbar (~57px tall + 20px offset + shadow)
+     so it doesn't sit on top of the last table rows or the note paragraph
+     once a selection is active. */
+  #compareTabContent { padding-bottom: 90px; }
+
+  #exportBtn {
+    margin-top: 16px;
+    width: 100%;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    cursor: pointer;
+  }
+  #exportBtn:hover { background: #efefec; }
+  #errorBox {
+    display: none;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    max-width: 600px;
+  }
+  .leaflet-marker-a { background: var(--green); border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.2); }
+  .leaflet-marker-b { background: var(--red); border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.2); }
+  .leaflet-marker-me {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); border: 3px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.25), 0 0 0 6px rgba(37,99,235,0.25);
+  }
+  .leaflet-marker-me.pulsing { animation: me-pulse 1.8s ease-out infinite; }
+  @keyframes me-pulse {
+    0%   { box-shadow: 0 0 0 1px rgba(0,0,0,0.25), 0 0 0 6px rgba(37,99,235,0.25); }
+    70%  { box-shadow: 0 0 0 1px rgba(0,0,0,0.25), 0 0 0 14px rgba(37,99,235,0); }
+    100% { box-shadow: 0 0 0 1px rgba(0,0,0,0.25), 0 0 0 6px rgba(37,99,235,0); }
+  }
+  /* One arrow icon per marker, rotated by an inline style set per-marker
+     (the bearing varies at each point along the route, so this can't be a
+     single static class). Fill/stroke/size all live on the inline SVG
+     itself (see directionArrowIcon in routes-data.js) rather than here --
+     this class only needs to keep the icons from intercepting clicks meant
+     for the map underneath. */
+  .route-direction-arrow {
+    pointer-events: none;
+  }
+  .locate-control a.active { color: var(--accent); }
+  .locate-control a.pending { opacity: 0.5; }
+
+  #panel3d { margin-top: 0; position: relative; }
+  #panel3d.js-maximized, #panel3d:fullscreen {
+    position: fixed; inset: 0; z-index: 9999; margin: 0;
+    background: var(--bg); display: flex; flex-direction: column;
+    padding: 14px; overflow-y: auto;
+    width: 100vw; height: 100vh;
+  }
+  #panel3d:-webkit-full-screen {
+    position: fixed; inset: 0; z-index: 9999; margin: 0;
+    background: var(--bg); display: flex; flex-direction: column;
+    padding: 14px; overflow-y: auto;
+    width: 100vw; height: 100vh;
+  }
+  #panel3d:-moz-full-screen {
+    position: fixed; inset: 0; z-index: 9999; margin: 0;
+    background: var(--bg); display: flex; flex-direction: column;
+    padding: 14px; overflow-y: auto;
+    width: 100vw; height: 100vh;
+  }
+  #panel3d.js-maximized #iso3dContainer, #panel3d:fullscreen #iso3dContainer {
+    flex: 1 1 auto; height: auto;
+  }
+  #panel3d:-webkit-full-screen #iso3dContainer {
+    flex: 1 1 auto; height: auto;
+  }
+  #panel3d:-moz-full-screen #iso3dContainer {
+    flex: 1 1 auto; height: auto;
+  }
+  /* Icon-stack controls for the 3D view -- lives inside #panel3d itself (not
+     the #viewportToolbar Map/3D toggle, which sits alongside panel3d in the
+     DOM) so it's reachable in BOTH normal embedded 3D and fullscreen/maximized
+     3D. Previously this only showed up during fullscreen (the embedded view
+     had a totally different, spread-out row of checkboxes/select/slider
+     instead) -- now it's the one control surface for both, matching how the
+     2D map's own top-right stack (layers / fullscreen / locate -- see
+     .leaflet-bar in leaflet.min.css) works: same white 30px squares, same
+     hairline divider, same shadow. No fullscreen-conditional display rule
+     needed anymore since it's just always shown whenever #panel3d itself is
+     (that visibility is already handled in JS via panel3d.style.display). */
+  #panel3dFsControls {
+    display: flex; flex-direction: column;
+    position: absolute; top: 14px; right: 14px; z-index: 20;
+    border-radius: 4px; box-shadow: 0 1px 5px rgba(0,0,0,.65); overflow: hidden;
+  }
+  #panel3dFsControls button {
+    width: 30px; height: 30px; padding: 0; border: none;
+    border-bottom: 1px solid #ccc; background: #fff; color: #000;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; line-height: 1; cursor: pointer;
+  }
+  #panel3dFsControls button:last-child { border-bottom: none; }
+  #panel3dFsControls button:hover { background: #f4f4f4; }
+  #panel3dFsControls button.active { background: var(--accent); color: #fff; }
+  #panel3dFsControls button.active:hover { background: #1d4ed8; }
+  #fs3dFullscreenBtn { font-size: 16px; }
+  /* The layers dropdown itself -- everything that used to be spread across
+     #panel3dControls as a horizontal row of labeled checkboxes/select/slider
+     (network picker, show-routes, show-trails, satellite, hill exaggeration)
+     now lives here instead, opened from the layers icon in the stack above.
+     Styled like Leaflet's own .leaflet-control-layers-expanded: white,
+     rounded, padded -- same family as the 2D map's layers popup. */
+  #panel3dLayersMenu {
+    display: flex; flex-direction: column; gap: 10px;
+    position: absolute; top: 14px; right: 52px; z-index: 21;
+    background: #fff; border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,.65);
+    padding: 14px; min-width: 220px; font-size: 12px; color: var(--text2);
+  }
+  #panel3dLayersMenu[hidden] { display: none; }
+  #panel3dLayersMenu label { display: flex; align-items: center; gap: 6px; }
+  #panel3dLayersMenu select { width: 100%; }
+  #panel3dLayersMenu input[type=range] { width: 100%; }
+
+  .panel3d-controls { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; width: 100%; }
+  .panel3d-controls label { font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 6px; }
+  .panel3d-controls input[type=range] { width: 120px; }
+  #close3dBtn, #compareRunBtn {
+    padding: 6px 12px; font-size: 12px; font-weight: 500;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: var(--card); cursor: pointer;
+  }
+  #close3dBtn:hover, #compareRunBtn:hover { background: #efefec; }
+  #compareRunBtn { background: var(--accent); color: #fff; border-color: var(--accent); }
+  #compareRunBtn:hover { background: #1d4ed8; }
+  #compareRunBtn:disabled { opacity: .5; cursor: default; }
+  #networkSelect {
+    padding: 6px 10px; font-size: 12px; font-weight: 500;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: var(--card); cursor: pointer; color: var(--text);
+  }
+  .cmp-status { font-size: 12.5px; color: var(--text3); min-height: 18px; margin-bottom: 10px; }
+  .cmp-status.err { color: var(--red); }
+
+  .cmp-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+  .cmp-table th, .cmp-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .cmp-table th { font-weight: 600; color: var(--text3); font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+  .cmp-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .cmp-table tr:hover td { background: var(--card); }
+  .cmp-trailname { font-weight: 600; color: var(--text); }
+  .cmp-segwarn { color: var(--text3); font-weight: 400; font-size: 11px; }
+
+  .cmp-chart-title { font-size: 11px; font-weight: 600; color: var(--text3); margin: 0 0 8px; text-transform: uppercase; letter-spacing: .03em; }
+
+  /* ---- Full trail-list browser (Compare tab) -- ported from the old standalone
+     trail-report.html page, which used to be a separate destination for browsing
+     every named trail and a separate flow for comparing specific ones. Prefixed
+     "tb-" throughout to stay clearly separate from .cmp-* above, which styles the
+     comparison RESULTS (the trails you've actually picked), not this browse list.
+     .cmp-field/.cmp-browse-toolbar style the Park/filter row at the top of that
+     list; #compareNetworkSelect (the Park dropdown) is just a plain <select>
+     inside a .cmp-field, no dedicated styling of its own needed. ---- */
+  .cmp-browse-toolbar {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; margin-bottom: 14px;
+  }
+  .cmp-field { display: flex; flex-direction: column; gap: 4px; }
+  .cmp-field label { font-size: 11px; color: var(--text3); font-weight: 500; }
+  .cmp-field select, .cmp-field input {
+    font-size: 13px; padding: 7px 9px; border: 1px solid var(--border);
+    border-radius: 6px; background: #fff; color: var(--text); min-width: 130px;
+  }
+  .cmp-filter-field { flex: 1; min-width: 220px; }
+  .cmp-filter-field input { width: 100%; }
+  .cmp-count { font-size: 12px; color: var(--text3); margin-left: auto; align-self: center; white-space: nowrap; }
+
+  .tb-tablewrap { overflow-x: auto; margin-bottom: 14px; }
+  .tb-tablewrap table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tb-tablewrap th, .tb-tablewrap td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .tb-tablewrap th {
+    font-weight: 600; color: var(--text3); font-size: 11px; text-transform: uppercase;
+    letter-spacing: .03em; cursor: pointer; user-select: none; white-space: nowrap;
+  }
+  .tb-tablewrap th:hover { color: var(--text); }
+  .tb-tablewrap th .tb-arrow { font-size: 9px; margin-left: 3px; opacity: .6; }
+  .tb-tablewrap td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .tb-tablewrap tbody tr:hover td { background: var(--card); }
+  .tb-trailname { font-weight: 600; }
+  .tb-expandToggle { cursor: pointer; }
+  .tb-expandToggle:hover { color: var(--accent); }
+  .tb-revBtn {
+    background: none; border: 1px solid var(--border); border-radius: 5px; cursor: pointer;
+    font-size: 11px; padding: 1px 5px; color: var(--text3); vertical-align: middle;
+  }
+  .tb-revBtn:hover { background: var(--card); }
+  .tb-revBtn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tb-tablewrap td.selcol, .tb-tablewrap th.selcol { width: 28px; text-align: center; padding-right: 4px; }
+  .tb-tablewrap td.selcol input[type=checkbox] { cursor: pointer; width: 15px; height: 15px; }
+  .tb-tablewrap tr.tb-datarow.is-selected td { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+
+  .cmp-selbar {
+    display: none; align-items: center; justify-content: space-between; gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px; padding: 12px 16px; border-radius: 10px;
+    background: var(--text); color: #fff;
+  }
+  /* The trail table this bar follows can run to 50-100+ rows, so a bar placed
+     inline in normal document flow (as it was) ends up rendered far below the
+     fold -- selecting a trail gave no visible feedback unless you scrolled past
+     the entire table. Fixed-to-viewport keeps it reachable the moment you check
+     a box, regardless of table length or scroll position. */
+  .cmp-selbar.visible {
+    display: flex;
+    position: fixed;
+    left: 24px;
+    right: 24px;
+    bottom: 20px;
+    z-index: 500;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    margin-bottom: 0;
+  }
+  .cmp-selbar span { font-size: 13px; }
+  .cmp-selbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .cmp-selbar .cmp-hires { color: #fff; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+  .cmp-selbar button {
+    background: #fff; color: var(--text); border: none; border-radius: 7px;
+    padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .cmp-selbar button:hover { opacity: 0.9; }
+  .cmp-selbar button.cmp-secondary {
+    background: none; color: #fff; border: 1px solid rgba(255,255,255,0.4);
+    font-weight: 500; padding: 8px 12px;
+  }
+  /* Trail-list rows reuse the existing sourceBadge()/.cmp-badge styling below rather
+     than a separate tb-badge -- same "GPS-verified vs. grid estimate" concept, no
+     need for a second copy of the same visual. */
+  .tb-segwarn { color: var(--text3); font-weight: 400; font-size: 11px; }
+
+  .tb-tablewrap tr.tb-detail-row td { background: var(--card); padding: 12px 14px; }
+  .tb-profile-body { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+  .tb-profile-chart { flex: 1 1 320px; min-width: 260px; background: #fff; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .tb-profile-svg { display: block; }
+  .tb-profile-stats { flex: 1 1 280px; min-width: 240px; font-size: 12.5px; color: var(--text2); display: flex; flex-direction: column; gap: 5px; }
+  .tb-profile-stats b { color: var(--text); }
+  .tb-cat { color: var(--text3); font-weight: 400; font-size: 11px; }
+
+  /* ---- Compare full-screen mode: while the Compare tab is active, the trail list
+     and its comparison results are the whole point of the screen, not the map --
+     see the .compare-fullscreen toggle on #main for what actually hides. ---- */
+  #backToMapBtn { display: none; }
+  body.compare-fullscreen #routesToggleBtn,
+  body.compare-fullscreen #detailsToggleBtn,
+  body.compare-fullscreen #rightPanelTabs,
+  body.compare-fullscreen .search-bar,
+  body.compare-fullscreen .map-card,
+  body.compare-fullscreen #rTitle,
+  body.compare-fullscreen #rSubtitle { display: none !important; }
+  body.compare-fullscreen #backToMapBtn { display: inline-block; }
+  body.compare-fullscreen .panel.open { width: 100% !important; border-left: none; }
+  body.compare-fullscreen .layout { display: block; }
+  .cmp-barlabel { font-size: 11px; fill: var(--text); }
+  .cmp-zeroline { stroke: var(--border); stroke-width: 1; }
+  .cmp-empty { color: var(--text3); font-size: 13px; padding: 24px 0; text-align: center; }
+
+  .cmp-profile {
+    border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+    margin-bottom: 10px; background: var(--card);
+  }
+  .cmp-profile-head { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .cmp-profile-body { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+  .cmp-profile-chart { flex: 1 1 260px; min-width: 220px; background: #fff; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .cmp-profile-svg { display: block; }
+  .cmp-profile-stats { flex: 1 1 260px; min-width: 240px; font-size: 12.5px; color: var(--text2); display: flex; flex-direction: column; gap: 5px; }
+  .cmp-profile-stats b { color: var(--text); }
+  .cmp-badge {
+    display: inline-block; font-size: 10.5px; font-weight: 600; padding: 2px 7px;
+    border-radius: 999px; background: var(--border); color: var(--text2); vertical-align: middle;
+  }
+  .cmp-badge-gps { background: var(--green); color: #fff; }
+
+  #iso3dContainer {
+    position: relative;
+    width: 100%;
+    border: 1px solid var(--border); border-radius: 12px;
+    background: #0a0e14;
+    cursor: grab;
+    overflow: hidden;
+  }
+  #iso3dContainer:active { cursor: grabbing; }
+  #iso3dContainer canvas { display: block; width: 100%; height: 100%; }
+  #iso3dStatus {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #cbd5e1; font-size: 13px; background: rgba(10,14,20,0.85);
+    text-align: center; padding: 20px; z-index: 5;
+  }
+  #iso3dTooltip {
+    position: absolute; display: none;
+    background: rgba(0,0,0,0.85); color: #fff;
+    padding: 5px 9px; border-radius: 5px; font-size: 12px;
+    pointer-events: none; z-index: 6; white-space: nowrap;
+  }
+  .legend .lg-item { display: flex; align-items: center; gap: 5px; }
+  .legend .lg-dot { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+
+  #loadOverlay {
+    position: fixed; inset: 0; background: var(--bg); z-index: 1000;
+    display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px;
+  }
+  #loadOverlay .spinner {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 3px solid var(--border); border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+  }
+  #loadOverlay p { color: var(--text2); font-size: 13px; margin: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #topBar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    position: relative; z-index: 950; background: var(--bg);
+  }
+  #topBar button {
+    padding: 8px 14px; font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--card); cursor: pointer;
+  }
+  #topBar button:hover { background: #efefec; }
+  #topBar button.open { background: var(--accent); color: #fff; border-color: var(--accent); }
+  #detailsToggleBtn { margin-left: auto; }
+
+  /* ---- Side panels ----
+     Desktop (>=1024px, default here): real flex columns that push the map/viewport
+     over when open and collapse to 0 width when closed -- no overlay, no backdrop,
+     nothing clipped behind the top bar.
+     Mobile (<1024px, see media query below): overlay drawers that slide in over
+     everything, since there's no spare width to push into on a phone. */
+  #sidebar, .panel {
+    flex: 0 0 auto; width: 0; overflow: hidden;
+    border-color: var(--border); background: var(--bg);
+    transition: width 0.2s ease;
+  }
+  #sidebar.open { width: 280px; overflow-y: auto; border-right: 1px solid var(--border); padding: 16px; }
+  .panel.open { width: 380px; overflow-y: auto; border-left: 1px solid var(--border); padding: 16px; }
+  /* Compare's table alone has 9 columns, plus a chart and a shape card per trail --
+     380px (fine for Details' single-route stats) crams all of that into a sliver
+     next to a mostly-idle map. Comparing trails is the point of this screen at that
+     moment, not the map, so it gets the room trail-report.html's own full-width
+     table already gets, and the map shrinks to fit instead of the other way around. */
+  .panel.open.compare-active { width: min(90vw, 1100px); }
+  #panelBackdrop { display: none; }
+
+  #backupBtns { display: flex; gap: 8px; margin-top: 10px; }
+  #backupBtns button {
+    flex: 1; padding: 7px 8px; font-size: 12px; font-weight: 500;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--card); cursor: pointer;
+  }
+  #backupBtns button:hover { background: #efefec; }
+
+  #cacheInfo { margin-top: 8px; }
+  #cacheVersionText { display: block; font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+  #forceRefreshBtn {
+    width: 100%; padding: 7px 8px; font-size: 12px; font-weight: 500;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--card); cursor: pointer;
+  }
+  #forceRefreshBtn:hover { background: #efefec; }
+  #forceRefreshBtn.working { opacity: 0.6; pointer-events: none; }
+
+  /* ---- Mobile / small tablet (<1024px) ----
+     Side panels revert to full-height overlay drawers over a dimmed backdrop --
+     the map/3D viewport keeps the full screen by default, panels slide over it
+     instead of squeezing it. z-index is above #topBar (950) so an open drawer's
+     own heading is never clipped behind the top bar. */
+  @media (max-width: 1023px) {
+    #sidebar, .panel {
+      position: fixed; top: 0; height: 100vh; width: min(85vw, 300px);
+      transition: transform 0.2s ease; z-index: 1010;
+      box-shadow: 2px 0 16px rgba(0,0,0,0.18);
+    }
+    #sidebar { left: 0; transform: translateX(-100%); border-right: 1px solid var(--border); padding: 16px; overflow-y: auto; }
+    .panel { right: 0; transform: translateX(100%); border-left: 1px solid var(--border); padding: 16px; overflow-y: auto; width: min(85vw, 320px); }
+    #sidebar.open, .panel.open { transform: translateX(0); width: min(85vw, 300px); }
+    .panel.open { width: min(85vw, 320px); }
+    /* Same reasoning as the desktop rule above -- Compare needs real room for its
+       table and charts, and on a tablet-width screen 320px is even tighter than on
+       desktop since there's no map alongside it to trade space with, just wasted
+       backdrop. */
+    .panel.open.compare-active { width: min(94vw, 900px); }
+    /* Compare full-screen mode needs the panel to actually replace the page content
+       (topBar and "Back to map" included) rather than overlay on top of it as a
+       fixed drawer -- position:fixed here was covering the very button meant to get
+       you out of this mode, since the drawer's z-index sits above everything else
+       including #topBar. */
+    body.compare-fullscreen .panel.open {
+      position: static; top: auto; height: auto; width: 100% !important;
+      transform: none; box-shadow: none; border-left: none; z-index: auto;
+    }
+    body.compare-fullscreen #panelBackdrop { display: none !important; }
+    #panelBackdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1005; }
+    #panelBackdrop.visible { display: block; }
+  }
+
+  /* ---- Mobile layout (phone/small tablet, used trailside) ---- */
+  @media (max-width: 720px) {
+    #app { flex-direction: column; height: auto; min-height: 100%; }
+    #main { padding: 16px; overflow-y: visible; }
+    .search-bar { max-width: none; }
+    .layout { flex-direction: column; }
+    .map-card { flex: 1 1 auto; width: 100%; min-width: 0; }
+    #mapWrap { height: 60vh; max-height: 70vh; resize: vertical; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .chart-stats-3 { grid-template-columns: 1fr 1fr; }
+    .chart-stats-3 .chart-stat:last-child { grid-column: 1 / -1; }
+    /* Row-wrap instead of one-control-per-line -- each control keeps its natural
+       width and wraps to the next row when it runs out of space, the same way the
+       desktop layout already does. This is what actually reclaims the vertical
+       space the sizing fix above needs; without it every checkbox, the slider, and
+       each button ate a full-width row on its own. */
+    .panel3d-controls { gap: 10px 16px; row-gap: 10px; }
+
+    /* While the 3D view is active on a small screen, the canvas itself needs the
+       room -- the unified legend/note/breadcrumb strip below it (built by
+       updateLegend, mode-aware) stays visible in both Map and 3D since it now
+       always describes whatever's actually on screen, rather than assuming 2D. */
+    /* JS (sizePanel3dForMobile) sets an exact inline height based on the actual
+       control-stack height above the canvas -- a fixed vh/calc guess here previously
+       assumed far less control-stack height than the park dropdown + checkboxes +
+       hill slider + save/load/location/fullscreen buttons actually take, so the
+       canvas rendered far taller than the viewport and needed a long scroll to
+       reach. This is just a sane ceiling for the brief instant before JS runs. */
+    body.showing3d #panel3d { max-height: 80vh; }
+    body.showing3d #panel3d #iso3dContainer { height: auto; min-height: 200px; }
+
+    /* On short phone screens (e.g. 360x640) even the 200px floor in
+       sizePanel3dForMobile doesn't fit once topBar + search bar + title/subtitle
+       + the control stack are all stacked above the canvas -- title/subtitle and
+       the search bar do nothing useful while looking at the 3D view anyway (search
+       operates on the 2D map), so drop them the same way body.compare-fullscreen
+       already drops #rSubtitle for its own full-screen mode. sizePanel3dForMobile
+       reads panel3d's live top position, so it automatically claims the
+       reclaimed space -- no JS change needed here. */
+    body.showing3d .search-bar,
+    body.showing3d #rTitle,
+    body.showing3d #rSubtitle { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loadOverlay"><div class="spinner"></div><p>Loading map…</p></div>
+
+<div id="dropOverlay">Drop your GPX file anywhere</div>
+<div id="updateBanner">
+  <div class="update-pill">
+    <span>A new version is ready.</span>
+    <button id="updateBannerRefreshBtn" type="button">Refresh</button>
+    <button class="update-dismiss" id="updateBannerDismissBtn" type="button" title="Dismiss">&times;</button>
+  </div>
+</div>
+
+<div id="app">
+  <div id="panelBackdrop"></div>
+  <div id="sidebar">
+    <button id="openBtn">+ Open GPX file</button>
+    <input type="file" id="fileInput" accept=".gpx,application/gpx+xml,application/xml,text/xml" multiple style="display:none;">
+    <h2>Loaded routes</h2>
+    <ul id="routeList"></ul>
+    <div id="backupBtns">
+      <button id="exportAllBtn" type="button" title="Save all loaded routes to one JSON file">Export all data</button>
+      <button id="importAllBtn" type="button" title="Restore routes from a previously exported JSON file">Import data</button>
+      <input type="file" id="importAllInput" accept=".json" style="display:none;">
+    </div>
+    <div id="cacheInfo">
+      <span id="cacheVersionText">Checking cached version…</span>
+      <button id="forceRefreshBtn" type="button" title="Clear the app's offline cache and service worker, then reload straight from the server. Your loaded routes are stored separately and are not affected.">Force refresh from server</button>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="topBar">
+      <button id="routesToggleBtn" type="button">&#9776; Routes</button>
+      <button id="compareToggleBtn" type="button" style="display:none;">&#8644; Compare trails</button>
+      <button id="backToMapBtn" type="button">&#8592; Back to map</button>
+      <button id="detailsToggleBtn" type="button">Details &#9662;</button>
+    </div>
+    <div id="errorBox"></div>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search a place, e.g. Lacamas Lake, Camas WA">
+      <button id="searchBtn">Search</button>
+    </div>
+
+    <h1 id="rTitle">Explore the map</h1>
+    <p class="subtitle" id="rSubtitle">Search a place above, or drag a GPX file anywhere on this window.</p>
+
+    <div class="layout">
+      <div class="map-card">
+        <div id="viewportToolbar">
+          <div id="viewModeSwitch">
+            <button id="viewModeMapBtn" type="button" class="active">Map</button>
+            <button id="viewModeMap3dBtn" type="button">3D</button>
+          </div>
+          <div id="map2dControls" class="panel3d-controls">
+            <label id="map2dNetworkLabel" style="display:none;"><input type="checkbox" id="show2dNetwork" checked> Show named singletrack</label>
+          </div>
+        </div>
+        <div id="mapWrap">
+          <div id="mapDiv"></div>
+          <button id="recenterBtn" type="button" style="display:none;">&#8982; Recenter</button>
+        </div>
+        <div id="panel3d" style="display:none;">
+          <div id="panel3dFsControls">
+            <button id="fs3dBackBtn" type="button" title="Back to map" aria-label="Back to map">&#8592;</button>
+            <button id="fs3dLayersBtn" type="button" title="Layers" aria-label="Layers">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,3 21,8 12,13 3,8"></polygon><polyline points="3,12 12,17 21,12"></polyline><polyline points="3,16 12,21 21,16"></polyline></svg>
+            </button>
+            <button id="fs3dLocateBtn" type="button" title="Show my location" aria-label="Show my location">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line></svg>
+            </button>
+            <button id="fs3dFullscreenBtn" type="button" title="Fill the screen with the 3D view" aria-label="Toggle fullscreen">&#x26F6;</button>
+          </div>
+          <div id="panel3dLayersMenu" hidden>
+            <select id="networkSelect" title="Which park's trail network to show" style="display:none;"></select>
+            <label><input type="checkbox" id="iso3dShowRides" checked> Show my route(s)</label>
+            <label><input type="checkbox" id="iso3dAllRoutes"> (all loaded, not just active)</label>
+            <label id="iso3dNetworkLabel" style="display:none;"><input type="checkbox" id="iso3dShowNetwork" checked> Show all named trails</label>
+            <label><input type="checkbox" id="iso3dSatelliteInput" checked> Satellite imagery</label>
+            <label>Hill exaggeration <input type="range" id="iso3dExagg" min="1" max="8" value="2" step="0.5"></label>
+          </div>
+          <div id="iso3dContainer">
+            <div id="iso3dStatus">Loading real ground elevation for this area from USGS…</div>
+            <div id="iso3dTooltip"></div>
+          </div>
+        </div>
+        <div class="legend" id="bottomLegend"></div>
+      </div>
+
+      <div class="panel">
+        <div id="rightPanelTabs">
+          <button id="tabDetailsBtn" type="button" class="active">Details</button>
+          <button id="tabTrailsBtn" type="button" style="display:none;">Trails ridden</button>
+        </div>
+
+        <div id="detailsTabContent">
+          <div id="statsPanel" style="display:none;">
+            <div class="chart-card">
+              <div class="chart-card-head">
+                <h3>Elevation</h3>
+                <button id="eleClearBtn" class="chart-clear-btn" type="button" style="display:none;">Clear selection</button>
+              </div>
+              <p class="chart-hint" id="chartHint">Nothing selected — drag across either chart below, or drag point A or B directly, to see stats for part of the route.</p>
+              <div class="chart-wrap" id="eleChartWrap">
+                <svg id="eleChartSvg" class="chart-svg"></svg>
+                <div class="chart-tooltip" id="eleChartTooltip"></div>
+              </div>
+              <div class="chart-stats">
+                <div class="chart-stat"><p id="statGain">-</p><span>Uphill</span></div>
+                <div class="chart-stat"><p id="statLoss">-</p><span>Downhill</span></div>
+                <div class="chart-stat"><p id="statHigh">-</p><span>Highest point</span></div>
+                <div class="chart-stat"><p id="statLow">-</p><span>Lowest point</span></div>
+              </div>
+            </div>
+
+            <div class="chart-card" id="speedChartCard" style="display:none;">
+              <div class="chart-card-head">
+                <h3>Speed Profile</h3>
+              </div>
+              <div class="chart-wrap" id="speedChartWrap">
+                <svg id="speedChartSvg" class="chart-svg"></svg>
+                <div class="chart-tooltip" id="speedChartTooltip"></div>
+              </div>
+              <div class="chart-stats chart-stats-3">
+                <div class="chart-stat"><p id="statAvgSpeed">-</p><span>Speed</span></div>
+                <div class="chart-stat"><p id="statMovingTime">-</p><span>Moving Time</span></div>
+                <div class="chart-stat"><p id="statElapsedTime">-</p><span>Elapsed Time</span></div>
+              </div>
+            </div>
+
+            <div class="chart-stats" style="margin-top:14px;">
+              <div class="chart-stat"><p id="statDist">-</p><span>Distance (along route)</span></div>
+              <div class="chart-stat"><p id="statStraight">-</p><span>Straight-line distance</span></div>
+              <div class="chart-stat"><p id="statDirection">-</p><span>Direction (A &rarr; B)</span></div>
+            </div>
+
+            <p class="note" id="timeNote">Drag on either chart to compare any two points on the route.</p>
+            <button id="exportBtn">Save this route as a standalone HTML file</button>
+          </div>
+          <div class="panel-empty" id="statsPanelEmpty">
+            <p>Load a GPX file to compare two points on it and see distance/speed/elevation stats here.</p>
+          </div>
+        </div>
+
+        <div id="trailsTabContent" style="display:none;">
+          <div id="trailsTabBody"></div>
+        </div>
+
+        <div id="compareTabContent" style="display:none;">
+          <div class="cmp-browse-toolbar">
+            <div class="cmp-field">
+              <label for="compareNetworkSelect">Park</label>
+              <select id="compareNetworkSelect"></select>
+            </div>
+            <div class="cmp-field cmp-filter-field">
+              <label for="compareFilterInput">Filter by name</label>
+              <input type="text" id="compareFilterInput" placeholder="Type to narrow the list…">
+            </div>
+            <div class="cmp-count" id="compareCountEl"></div>
+          </div>
+
+          <div id="compareBrowseArea"></div>
+
+          <div id="compareSelBar" class="cmp-selbar">
+            <span id="compareSelBarText">0 selected</span>
+            <span class="cmp-selbar-actions">
+              <label class="cmp-hires"><input type="checkbox" id="compareHiRes"> USGS per-point (live, needs internet)</label>
+              <button id="compareClearSelBtn" type="button" class="cmp-secondary">Clear</button>
+              <button id="compareRunBtn" type="button">Compare selected</button>
+            </span>
+          </div>
+
+          <div id="compareStatus" class="cmp-status"></div>
+          <div id="compareResults"></div>
+
+          <p class="note">Elevation is sampled from the same precomputed USGS terrain grid used elsewhere in the app — instant and offline, but grid cells are roughly 100&ndash;150 ft across, so short punchy pitches get smoothed out and "max pitch" reads lower than what a tight technical section actually feels like. Trails covered by rides you've loaded automatically use your own real GPS data instead (green "GPS-verified" badge). Check "USGS per-point" above before comparing to query live ground-truth elevation at each trail point instead of the grid — more accurate on tight sections, but needs internet and takes longer.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="leaflet.min.js"></script>
+<script>
+  // Every park's data files (trails + terrain) are 90KB-450KB apiece -- loading
+  // all five on every visit (as this used to do, unconditionally) meant 1.1MB
+  // downloaded before you'd even picked a park. This tiny inline table is the
+  // one thing that genuinely needs to be known for every park up front (it's
+  // how a dropped GPX gets sorted to the right park before that park's full
+  // data has loaded); the actual trail geometry and terrain grid load lazily,
+  // only for whichever park is active, via ensureParkLoaded() below.
+  window.PARK_BOUNDS = {"ucsc":{"latMin":36.9845,"latMax":37.03384,"lonMin":-122.10641,"lonMax":-122.03808},"annadel":{"latMin":38.389907,"latMax":38.456979,"lonMin":-122.660023,"lonMax":-122.575446},"lacamas":{"latMin":45.584324,"latMax":45.618315,"lonMin":-122.432665,"lonMax":-122.375096},"fallcreek":{"latMin":37.013537,"latMax":37.05435,"lonMin":-122.072019,"lonMax":-122.034518},"art":{"latMin":38.205871,"latMax":38.289943,"lonMin":-120.400232,"lonMax":-120.328482}};
+</script>
+<script src="js/core.js"></script>
+<script src="js/park-data.js"></script>
+<script src="js/routes-data.js"></script>
+<script src="js/map-2d.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/ui-shell.js"></script>
+<script src="js/map-3d.js"></script>
+<script src="js/compare-trails.js"></script>
+<script src="js/app-init.js"></script>
+</body>
+</html>

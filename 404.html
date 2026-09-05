@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page not found — SchaeferWerks</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Zilla+Slab:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #1C1917; --mount: #17140F; --text: #F2EDE4;
+  --text-muted: #9C9187; --accent-amber: #D9A441; --border: #3A332C;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%;
+  background: var(--bg); color: var(--text);
+  font-family: 'Lora', serif;
+  display: flex; align-items: center; justify-content: center;
+}
+::selection { background: #C8433A; color: var(--text); }
+.wrap {
+  text-align: center; padding: 40px;
+  max-width: 480px;
+}
+.mount {
+  background: var(--mount); border-radius: 10px;
+  padding: 40px 32px; margin-bottom: 28px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 2px 0 rgba(255,255,255,0.03) inset;
+}
+.code {
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  letter-spacing: 0.14em; color: var(--accent-amber); text-transform: uppercase;
+}
+.headline {
+  font-family: 'Special Elite', monospace;
+  font-size: clamp(24px, 5vw, 32px);
+  margin: 14px 0 0;
+}
+p.sub {
+  color: var(--text-muted); font-size: 15px; line-height: 1.7;
+  margin: 18px 0 0;
+}
+a.home {
+  display: inline-block; margin-top: 28px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  color: var(--text); text-decoration: none;
+  padding: 10px 20px; border: 1px solid var(--border); border-radius: 4px;
+  transition: border-color 0.15s, color 0.15s;
+}
+a.home:hover { border-color: var(--accent-amber); color: var(--accent-amber); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="mount">
+      <div class="code">404</div>
+      <div class="headline">This slide isn't in the carousel.</div>
+      <p class="sub">The page you're looking for doesn't exist, or it's moved.</p>
+    </div>
+    <a class="home" href="/">&larr; Back to SchaeferWerks</a>
+  </div>
+</body>
+</html>

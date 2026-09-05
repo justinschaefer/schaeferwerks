@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SchaeferWerks</title>
+<meta name="description" content="SchaeferWerks — a Vietnam-era photo memorial for Wil Schaefer, and a GPX route explorer for the Santa Cruz &amp; UCSC trail network.">
+<link rel="canonical" href="https://schaeferwerks.com/">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="SchaeferWerks">
+<meta property="og:description" content="A Vietnam-era photo memorial for Wil Schaefer, and a GPX route explorer for the Santa Cruz &amp; UCSC trail network.">
+<meta property="og:url" content="https://schaeferwerks.com/">
+<meta property="og:image" content="https://schaeferwerks.com/favicon-512.png">
+<meta property="og:site_name" content="SchaeferWerks">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SchaeferWerks">
+<meta name="twitter:description" content="A Vietnam-era photo memorial for Wil Schaefer, and a GPX route explorer for the Santa Cruz &amp; UCSC trail network.">
+<meta name="twitter:image" content="https://schaeferwerks.com/favicon-512.png">
+
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
+<meta name="theme-color" content="#1C1917">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "SchaeferWerks",
+  "url": "https://schaeferwerks.com/"
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Zilla+Slab:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #1C1917;
+  --surface: #2A2521;
+  --mount: #17140F;
+  --text: #F2EDE4;
+  --text-muted: #9C9187;
+  --accent-red: #C8433A;
+  --accent-amber: #D9A441;
+  --border: #3A332C;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; min-height: 100%;
+  background: var(--bg); color: var(--text);
+  font-family: 'Lora', serif;
+}
+::selection { background: var(--accent-red); color: var(--text); }
+
+body {
+  display: flex; flex-direction: column; min-height: 100vh;
+}
+
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+header.hero {
+  padding: 72px 40px 48px; text-align: center;
+  background: radial-gradient(ellipse at 50% 0%, #262220 0%, var(--bg) 60%);
+  border-bottom: 1px solid var(--border);
+}
+header.hero .mark {
+  font-family: 'Special Elite', monospace;
+  font-size: clamp(30px, 5vw, 46px);
+  letter-spacing: 0.01em;
+  margin: 10px 0 8px;
+  color: var(--text);
+}
+header.hero .byline {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px; color: var(--accent-amber);
+  letter-spacing: 0.04em;
+}
+
+main {
+  flex: 1;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 64px 40px 40px;
+  width: 100%;
+}
+
+.links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 36px;
+}
+
+a.tile {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.mount {
+  background: var(--mount);
+  border-radius: 10px;
+  padding: 20px 20px 26px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 2px 0 rgba(255,255,255,0.03) inset;
+  border: 1px solid transparent;
+  transition: border-color 0.2s, transform 0.2s;
+  height: 100%;
+}
+a.tile:hover .mount {
+  border-color: var(--accent-amber);
+  transform: translateY(-2px);
+}
+
+.frame {
+  aspect-ratio: 3 / 2;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  background: #0e0c0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.frame.memorial {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(217,164,65,0.10), transparent 55%),
+    linear-gradient(160deg, #24211d 0%, #17140f 70%);
+}
+.frame.trail {
+  background:
+    radial-gradient(circle at 70% 25%, rgba(200,67,58,0.12), transparent 55%),
+    linear-gradient(160deg, #1e2320 0%, #14120f 70%);
+}
+.frame-glyph {
+  font-family: 'Special Elite', monospace;
+  font-size: 15px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  opacity: 0.55;
+}
+.frame svg { width: 42%; height: 42%; opacity: 0.5; }
+
+.tile-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--accent-amber);
+  margin-top: 14px;
+}
+.tile-title {
+  font-family: 'Zilla Slab', serif; font-weight: 700; font-size: 22px;
+  margin-top: 4px; color: var(--text);
+}
+.tile-desc {
+  font-family: 'Lora', serif; font-size: 14.5px; line-height: 1.6;
+  color: var(--text-muted); margin-top: 10px;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 22px 40px;
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+footer a {
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+footer a:hover { color: var(--accent-amber); border-color: var(--accent-amber); }
+
+@media (max-width: 600px) {
+  header.hero { padding: 56px 24px 36px; }
+  main { padding: 48px 24px 32px; }
+  .links { gap: 24px; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="mark">SchaeferWerks</div>
+  <div class="byline">SHEPHERD FACTORY</div>
+</header>
+
+<main>
+  <div class="links">
+
+    <a class="tile" href="/wilschaefer/index.html">
+      <div class="mount">
+        <div class="frame memorial">
+          <div class="frame-glyph">1963&ndash;1964</div>
+        </div>
+        <div class="tile-label">MEMORIAL ARCHIVE</div>
+        <div class="tile-title">Wil Schaefer</div>
+        <div class="tile-desc">286 Kodachrome slides from my father&rsquo;s tour as an Army medic in Vietnam &mdash; restored, catalogued, and researched tray by tray.</div>
+      </div>
+    </a>
+
+    <a class="tile" href="/mtbike/index.html">
+      <div class="mount">
+        <div class="frame trail">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#D9A441" stroke-width="2.5" stroke-linecap="round">
+            <path d="M15 78 Q30 40 50 55 T85 25" />
+            <circle cx="15" cy="78" r="3" fill="#D9A441" stroke="none" />
+            <circle cx="85" cy="25" r="3" fill="#C8433A" stroke="none" />
+          </svg>
+        </div>
+        <div class="tile-label">TRAIL TOOL</div>
+        <div class="tile-title">GPX Route Explorer</div>
+        <div class="tile-desc">Drop in any GPX file to see it plotted against the full UCSC &amp; Pogonip trail network, with distance, time, and elevation between any two points, trail labeling, and a searchable map.</div>
+      </div>
+    </a>
+
+  </div>
+</main>
+
+<footer>
+  Hosted by <a href="https://www.hostingmycloud.com/" target="_blank" rel="noopener">HostingMyCloud</a>
+</footer>
+
+</body>
+</html>
