@@ -1,1 +1,5 @@
 .git
+.gitignore
+.assetsignore
+wrangler.jsonc
+deploy.command
