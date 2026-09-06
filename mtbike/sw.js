@@ -4,7 +4,7 @@
 // next activate() delete the old one -- without a bump, a device that's
 // already cached this will keep serving the old files indefinitely, by
 // design (that's what makes it reliable with no signal).
-var CACHE_VERSION = 'v28';
+var CACHE_VERSION = 'v29';
 var CACHE_NAME = 'gpx-explorer-' + CACHE_VERSION;
 
 // Separate, capped cache for map tiles (see the fetch handler below for why

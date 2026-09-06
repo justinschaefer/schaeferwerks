@@ -74,10 +74,9 @@
   var NETWORK_SINGLETRACK_COLOR = '#000000';
   var NETWORK_ROAD_COLOR = '#3f3f3f';
   // Same "recede to reference context" idea as the two above, but shifted in
-  // hue (not just shade) so these read as a different KIND of context --
-  // real trails, just not part of this park's core area or not yet named.
+  // hue (not just shade) so this reads as a different KIND of context -- a
+  // real trail that just doesn't have a name yet, rather than a road.
   // See mtbike-explorer/README.txt, "Empire Grade / Highway 9 data split".
-  var NETWORK_WILDER_COLOR = '#2f6f6f';
   var NETWORK_UNNAMED_COLOR = '#8a6d3f';
 
   var t3d = {
@@ -934,17 +933,16 @@
     // values did before the styling redesign.
     addMergedGroup(t3d.networkLines, collectSegments(net.roads, 1.0), NETWORK_ROAD_COLOR, ribbonHalfWidthForPixels(2.0, 1.2, 25), { opacity: 0.8, casing: true });
     addMergedGroup(t3d.networkLines, collectSegments(net.singletrack, 1.5), NETWORK_SINGLETRACK_COLOR, ribbonHalfWidthForPixels(2.4, 1.2, 30), { opacity: 0.9, casing: true });
-    // net.wilderSingletrack (named trails real but outside this park's core
-    // area) and net.unnamedPaths (real but unnamed connectors inside it) --
-    // both drawn here since the 3D view has no base-map labeling to lean on,
-    // same reasoning as the always-drawn net.roads above. Matters more here
-    // than on the 2D map since we're the ones actually drawing the terrain
-    // these trails sit on -- leaving real geometry out understates what's
-    // really there. See mtbike-explorer/README.txt, "Empire Grade / Highway 9
-    // data split".
-    if (net.wilderSingletrack) {
-      addMergedGroup(t3d.networkLines, collectSegments(net.wilderSingletrack, 1.5), NETWORK_WILDER_COLOR, ribbonHalfWidthForPixels(2.0, 1.2, 30), { opacity: 0.75, casing: true });
-    }
+    // net.unnamedPaths -- real but unnamed connectors inside this park's core
+    // area -- drawn here since the 3D view has no base-map labeling to lean
+    // on, same reasoning as the always-drawn net.roads above. Matters more
+    // here than on the 2D map since we're the ones actually drawing the
+    // terrain these trails sit on -- leaving real geometry out understates
+    // what's really there. See mtbike-explorer/README.txt, "Empire Grade /
+    // Highway 9 data split". (Trails across Empire Grade itself now live in
+    // their own separate park -- see wilder_trails_data.js / NETWORKS.wilder
+    // in park-data.js -- rather than as an overlay on this one, since they
+    // need their own elevation grid to render correctly in 3D.)
     if (net.unnamedPaths) {
       addMergedGroup(t3d.networkLines, collectUnnamedSegments(net.unnamedPaths, 1.5), NETWORK_UNNAMED_COLOR, ribbonHalfWidthForPixels(2.0, 1.2, 30), { opacity: 0.7, casing: true });
     }

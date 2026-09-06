@@ -35,6 +35,14 @@
   // ---- Which park's trail network + precomputed terrain is active ----
   var NETWORKS = {
     ucsc: { id: 'ucsc', label: 'UCSC / Twin Gates', trailVar: 'UCSC_TRAIL_NETWORK', terrainVar: 'UCSC_TERRAIN_DATA' },
+    // West of Empire Grade from the UCSC network above -- Wilder Ranch plus
+    // the closer cluster right across the road (Mailboxes, Wally World,
+    // Broncos, Red Mailbox, and friends). Split into its own park, same as
+    // Fall Creek below, rather than drawn as an overlay on the UCSC map,
+    // because a real 3D view needs its own elevation grid to render
+    // correctly -- see wilder_terrain_data.js and mtbike-explorer/README.txt,
+    // "Empire Grade / Highway 9 data split".
+    wilder: { id: 'wilder', label: 'Wilder Ranch (west of Empire Grade)', trailVar: 'WILDER_TRAIL_NETWORK', terrainVar: 'WILDER_TERRAIN_DATA' },
     annadel: { id: 'annadel', label: 'Trione-Annadel State Park', trailVar: 'ANNADEL_TRAIL_NETWORK', terrainVar: 'ANNADEL_TERRAIN_DATA' },
     lacamas: { id: 'lacamas', label: 'Lacamas Park, Camas WA', trailVar: 'LACAMAS_TRAIL_NETWORK', terrainVar: 'LACAMAS_TERRAIN_DATA' },
     fallcreek: { id: 'fallcreek', label: 'Fall Creek / Bear Mountain, Felton', trailVar: 'FALLCREEK_TRAIL_NETWORK', terrainVar: 'FALLCREEK_TERRAIN_DATA' },

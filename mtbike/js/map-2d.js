@@ -347,15 +347,6 @@
       });
     }
     addCategory(net.singletrack, { color: NETWORK_SINGLETRACK_COLOR, haloWeight: 3.5, weight: 1.75, opacity: 0.7 });
-    // Named trails that are real but sit outside this park's core area (across
-    // Empire Grade, e.g. the four re-homed here plus Wilder-style finds) --
-    // drawn for context, dashed and muted so they don't read as part of the
-    // core network, and deliberately NOT added to net.singletrack so they
-    // never show up in the trail pickers (compare-trails.js only ever reads
-    // net.singletrack / net.roads).
-    if (net.wilderSingletrack) {
-      addCategory(net.wilderSingletrack, { color: NETWORK_WILDER_COLOR, haloWeight: 3, weight: 1.5, opacity: 0.65, dashArray: '6,4' });
-    }
     // Real, mapped-but-unnamed connector paths inside the core area (the
     // Side Saddle / Pipeline cluster) -- drawn so the map is honest about
     // what's actually on the ground, without inventing names for them.
