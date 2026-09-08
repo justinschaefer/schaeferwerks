@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page not found | GPX Route Explorer</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1e3a2f">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root {
+    --bg: #faf9f6; --card: #f2f0ea; --border: #e3ded3;
+    --text: #111827; --text2: #4b5563; --text3: #9ca3af;
+    --green: #16a34a; --forest: #1e3a2f;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wrap { text-align: center; padding: 40px; max-width: 460px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 36px 30px; margin-bottom: 24px;
+  }
+  svg.trail { width: 90px; height: 90px; margin: 0 auto 10px; display: block; }
+  .code {
+    font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--green); font-weight: 600;
+  }
+  .headline {
+    font-size: clamp(20px, 5vw, 25px); font-weight: 600; margin: 10px 0 0; color: var(--text);
+  }
+  p.sub {
+    color: var(--text2); font-size: 14.5px; line-height: 1.6; margin: 14px 0 0;
+  }
+  a.home {
+    display: inline-block; font-size: 13.5px; font-weight: 500;
+    color: #fff; background: var(--forest); text-decoration: none;
+    padding: 10px 22px; border-radius: 8px;
+    transition: opacity 0.15s;
+  }
+  a.home:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <svg class="trail" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round">
+        <path d="M15 78 Q30 40 50 55 T85 25" stroke-dasharray="1 9"/>
+        <circle cx="15" cy="78" r="4" fill="#16a34a" stroke="none"/>
+        <circle cx="85" cy="25" r="4" fill="#dc2626" stroke="none"/>
+      </svg>
+      <div class="code">404</div>
+      <div class="headline">Off the marked trail.</div>
+      <p class="sub">This page doesn't exist, or the route's moved.</p>
+    </div>
+    <a class="home" href="/mtbike/index.html">&larr; Back to Route Explorer</a>
+  </div>
+</body>
+</html>
