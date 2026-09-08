@@ -105,6 +105,7 @@
   var fs3dBackBtn = document.getElementById('fs3dBackBtn');
   var fs3dLayersBtn = document.getElementById('fs3dLayersBtn');
   var fs3dLocateBtn = document.getElementById('fs3dLocateBtn');
+  var fs3dRecenterBtn = document.getElementById('fs3dRecenterBtn');
   var fs3dFullscreenBtn = document.getElementById('fs3dFullscreenBtn');
   var panel3dLayersMenu = document.getElementById('panel3dLayersMenu');
   if (fs3dLocateBtn && !navigator.geolocation) fs3dLocateBtn.hidden = true;
@@ -170,6 +171,10 @@
     if (recenterBtn) recenterBtn.style.display = 'none';
     if (locateLink) { locateLink.classList.add('active', 'pending'); }
     if (fs3dLocateBtn) fs3dLocateBtn.classList.add('active');
+    // Recenter-the-3D-camera control only makes sense once we're actually
+    // tracking a position -- shown/hidden alongside the locate toggle itself,
+    // same as the 2D map's own #recenterBtn is tied to locate being active.
+    if (fs3dRecenterBtn) fs3dRecenterBtn.style.display = 'flex';
     locateWatchId = navigator.geolocation.watchPosition(onLocatePosition, onLocateError, {
       enableHighAccuracy: true, maximumAge: 5000, timeout: 15000
     });
@@ -181,6 +186,7 @@
     if (locateAccuracyCircle) { map.removeLayer(locateAccuracyCircle); locateAccuracyCircle = null; }
     if (locateLink) { locateLink.classList.remove('active', 'pending'); }
     if (fs3dLocateBtn) fs3dLocateBtn.classList.remove('active');
+    if (fs3dRecenterBtn) fs3dRecenterBtn.style.display = 'none';
     locateHasFix = false;
     if (recenterBtn) recenterBtn.style.display = 'none';
     removeT3DLocateMarker();
@@ -283,8 +289,10 @@
     // L.featureGroup so routeLine stays a single Leaflet layer everywhere
     // else in the app that touches it (map.removeLayer, .getBounds()) --
     // no other file needs to know it's actually two lines underneath.
-    var halo = L.polyline(coords, { color: '#fff', weight: 9, opacity: 0.9, lineCap: 'round', lineJoin: 'round' });
-    var line = L.polyline(coords, { color: '#d6336c', weight: 5, opacity: 1, lineCap: 'round', lineJoin: 'round' });
+    // Thinned 2026-09-08 (9px/5px -> 7px/4px) -- Justin flagged from real ride
+    // screenshots that the trail lines read as too thick/heavy overall.
+    var halo = L.polyline(coords, { color: '#fff', weight: 7, opacity: 0.9, lineCap: 'round', lineJoin: 'round' });
+    var line = L.polyline(coords, { color: '#d6336c', weight: 4, opacity: 1, lineCap: 'round', lineJoin: 'round' });
     routeLine = L.featureGroup([halo, line]).addTo(map);
     clearDirectionArrows();
     directionArrowMarkers = buildDirectionArrows(route);
@@ -346,7 +354,9 @@
           .addTo(group);
       });
     }
-    addCategory(net.singletrack, { color: NETWORK_SINGLETRACK_COLOR, haloWeight: 3.5, weight: 1.75, opacity: 0.7 });
+    // Thinned 2026-09-08 (halo 3.5->2.5, line 1.75->1.1) alongside the route
+    // line above -- same "everything reads too thick" feedback.
+    addCategory(net.singletrack, { color: NETWORK_SINGLETRACK_COLOR, haloWeight: 2.5, weight: 1.1, opacity: 0.7 });
     // Real, mapped-but-unnamed connector paths inside the core area (the
     // Side Saddle / Pipeline cluster) -- drawn so the map is honest about
     // what's actually on the ground, without inventing names for them.

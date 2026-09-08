@@ -65,14 +65,15 @@
   // several are shown in 3D at once, a different concern from single-route
   // styling. See mtbike-explorer/README.txt, "3D line improvements".
   var ROUTE_COLORS = ['#d6336c', '#2fd4ff', '#ffd23f', '#7dd956', '#c77dff', '#ff8fab'];
-  // Both categories recede to a neutral gray family (see mtbike-explorer/
-  // README.txt, "Trail styling redesign" for the reasoning and mockups this
-  // came from) -- differentiated from each other by a shade difference here
-  // and, on the 2D map specifically, a dashed pattern for roads (see
-  // draw2DTrailNetwork in map-2d.js). The point is for these to read as
-  // reference context, not compete with the rider's own route for attention.
+  // Both categories are plain black now -- Justin flagged (2026-09-08, from
+  // real ride screenshots) that the old shade difference between these two
+  // (pure black singletrack vs. dark-gray #3f3f3f roads) just looked like a
+  // rendering inconsistency rather than a deliberate distinction. Fire roads
+  // vs. singletrack is communicated by ribbon WIDTH instead now (roads wide,
+  // singletrack thin -- see the addMergedGroup calls in buildNetworkLines,
+  // below), the way an actual printed trail map does it.
   var NETWORK_SINGLETRACK_COLOR = '#000000';
-  var NETWORK_ROAD_COLOR = '#3f3f3f';
+  var NETWORK_ROAD_COLOR = '#000000';
   // Same "recede to reference context" idea as the two above, but shifted in
   // hue (not just shade) so this reads as a different KIND of context -- a
   // real trail that just doesn't have a name yet, rather than a road.
@@ -915,24 +916,19 @@
     // they stay visible at whatever zoom level this view opens at. Each dataset
     // batches into a single pair of meshes (visible + hit-test) instead of one
     // pair per trail segment.
-    // Roads previously targeted 4px -- wider than the route's own 3.5px at the
-    // time -- and both categories were fully opaque, same backwards hierarchy
-    // as 2D had before its redesign. Now both are narrower than the route
-    // (4.5px) and semi-transparent so they read as reference context, not
-    // competing lines. Opacity values match the 2D map's for the same
-    // categories (see draw2DTrailNetwork in map-2d.js) for a consistent feel
-    // switching between views.
-    // Widths and opacity both bumped up from the previous pass (roads
-    // 1.6px->2.0px, singletrack 2.0px->2.4px; opacity 0.55->0.8, 0.75->0.9) --
-    // the old values were tuned by reasoning about hierarchy (route should
-    // visually win) without actually rendering a real park and checking
-    // whether the network was still legible at all once that hierarchy was
-    // applied. It wasn't. The dark casing (see addMergedGroup) is doing most
-    // of the actual contrast work now, so these can afford to sit closer to
-    // opaque without competing with the route the way the old fully-opaque
-    // values did before the styling redesign.
-    addMergedGroup(t3d.networkLines, collectSegments(net.roads, 1.0), NETWORK_ROAD_COLOR, ribbonHalfWidthForPixels(2.0, 1.2, 25), { opacity: 0.8, casing: true });
-    addMergedGroup(t3d.networkLines, collectSegments(net.singletrack, 1.5), NETWORK_SINGLETRACK_COLOR, ribbonHalfWidthForPixels(2.4, 1.2, 30), { opacity: 0.9, casing: true });
+    // FIXED 2026-09-08: this had drifted backwards from the comment above --
+    // roads were targeting 2.0px and singletrack 2.4px, i.e. singletrack was
+    // rendering WIDER than fire roads, opposite of reality and opposite of what
+    // this comment always said the intent was. Now roads genuinely render
+    // fatter (3.4px) than singletrack (1.3px), and both categories are the same
+    // flat black (see NETWORK_ROAD_COLOR/NETWORK_SINGLETRACK_COLOR above) instead
+    // of two close, easily-confused shades -- width alone now carries the
+    // fire-road-vs-singletrack distinction, opacity bumped to match on both so
+    // neither reads as more "washed out" than the other. The dark casing (see
+    // addMergedGroup) still does most of the actual contrast-against-terrain
+    // work.
+    addMergedGroup(t3d.networkLines, collectSegments(net.roads, 1.0), NETWORK_ROAD_COLOR, ribbonHalfWidthForPixels(3.4, 1.8, 30), { opacity: 0.85, casing: true });
+    addMergedGroup(t3d.networkLines, collectSegments(net.singletrack, 1.5), NETWORK_SINGLETRACK_COLOR, ribbonHalfWidthForPixels(1.3, 1.0, 18), { opacity: 0.85, casing: true });
     // net.unnamedPaths -- real but unnamed connectors inside this park's core
     // area -- drawn here since the 3D view has no base-map labeling to lean
     // on, same reasoning as the always-drawn net.roads above. Matters more
@@ -1008,26 +1004,48 @@
   }
 
   // ---- GPS "you are here" marker + traveled-path line, mirrored into the 3D scene ----
+  // Sized noticeably bigger than before (was radius 4-18m -- easy to lose against
+  // real terrain/satellite texture from any distance; see Justin's 2026-09-08
+  // ride screenshots, where the dot was barely a speck) and given a white outer
+  // shell + always-on-top depth settings so it reads as a clear marker instead
+  // of blending into whatever ground color happens to be underneath it.
   function updateT3DLocateMarker(lat, lon) {
     if (!t3d.scene || !t3d.grid) return;
     var xz = toLocalXZ(lat, lon);
     var groundY = sampleGridElevM(lat, lon) * t3d.exagg;
     var beaconTopY = groundY + Math.min(Math.max(25, t3d.camDist * 0.12), 60);
+    var radius = Math.min(Math.max(9, t3d.camDist*0.016), 34);
     if (!t3d.meMarker3d) {
-      var radius = Math.min(Math.max(4, t3d.camDist*0.008), 18);
-      var geo = new THREE.SphereGeometry(radius, 14, 14);
-      var mat = new THREE.MeshBasicMaterial({ color: 0x2563eb });
+      // White halo sphere behind the blue core -- same "light outline around a
+      // colored mark" trick used for routes/trails elsewhere in this file --
+      // so the dot keeps contrast over dark satellite imagery and bright green
+      // terrain alike. depthTest:false + high renderOrder keeps both spheres
+      // drawing on top of the terrain mesh even when the marker sits slightly
+      // inside a hill from this angle.
+      var haloGeo = new THREE.SphereGeometry(1, 14, 14);
+      var haloMat = new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: false });
+      t3d.meMarkerHalo3d = new THREE.Mesh(haloGeo, haloMat);
+      t3d.meMarkerHalo3d.renderOrder = 998;
+      t3d.scene.add(t3d.meMarkerHalo3d);
+
+      var geo = new THREE.SphereGeometry(1, 18, 18);
+      var mat = new THREE.MeshBasicMaterial({ color: 0x2563eb, depthTest: false });
       t3d.meMarker3d = new THREE.Mesh(geo, mat);
+      t3d.meMarker3d.renderOrder = 999;
       t3d.scene.add(t3d.meMarker3d);
     }
-    t3d.meMarker3d.position.set(xz.x, groundY + 4, xz.z);
+    t3d.meMarker3d.scale.setScalar(radius);
+    t3d.meMarkerHalo3d.scale.setScalar(radius * 1.35);
+    t3d.meMarker3d.position.set(xz.x, groundY + radius, xz.z);
+    t3d.meMarkerHalo3d.position.copy(t3d.meMarker3d.position);
 
     var beaconPositions = new Float32Array([xz.x, groundY, xz.z, xz.x, beaconTopY, xz.z]);
     if (!t3d.meBeacon3d) {
       var bgeom = new THREE.BufferGeometry();
       bgeom.setAttribute('position', new THREE.BufferAttribute(beaconPositions, 3));
-      var bmat = new THREE.LineBasicMaterial({ color: 0x2563eb, transparent: true, opacity: 0.5 });
+      var bmat = new THREE.LineBasicMaterial({ color: 0x2563eb, transparent: true, opacity: 0.6, depthTest: false });
       t3d.meBeacon3d = new THREE.Line(bgeom, bmat);
+      t3d.meBeacon3d.renderOrder = 997;
       t3d.scene.add(t3d.meBeacon3d);
     } else {
       t3d.meBeacon3d.geometry.setAttribute('position', new THREE.BufferAttribute(beaconPositions, 3));
@@ -1037,7 +1055,33 @@
 
   function removeT3DLocateMarker() {
     if (t3d.meMarker3d) { if (t3d.scene) t3d.scene.remove(t3d.meMarker3d); t3d.meMarker3d = null; }
+    if (t3d.meMarkerHalo3d) { if (t3d.scene) t3d.scene.remove(t3d.meMarkerHalo3d); t3d.meMarkerHalo3d = null; }
     if (t3d.meBeacon3d) { if (t3d.scene) t3d.scene.remove(t3d.meBeacon3d); t3d.meBeacon3d = null; }
+  }
+
+  // ---- 3D recenter: unlike the 2D map, orbiting/panning the 3D camera never
+  // had any way to snap back to your GPS position -- #recenterBtn lives inside
+  // #mapWrap, which is hidden outright while panel3d is showing, and its
+  // handler (reengageFollow, in map-2d.js) only ever touched the 2D Leaflet
+  // map. This points the 3D camera's look-at target straight at the last known
+  // fix, using the same ground-height sampling the "you are here" marker uses,
+  // so the beacon ends up centered on screen. Deliberately does NOT reset
+  // camDist/camPhi/camTheta (viewing angle/zoom) -- only what you're pointed
+  // at -- except pulling camDist in when it's currently zoomed out past a
+  // reasonable "look at one spot on the ground" distance, since a park-wide
+  // "fit whole park" framing would otherwise leave the recentered view still
+  // too far out to actually see yourself on. Wired unconditionally to
+  // #fs3dRecenterBtn's click (shown/hidden alongside GPS tracking itself, see
+  // startLocate/stopLocate in map-2d.js) rather than trying to detect "you
+  // panned away from follow" the way the 2D map does -- simpler and more
+  // predictable: it's always safe to tap.
+  function recenter3DOnLocation() {
+    if (!lastLocateLatLng || !t3d.grid || !t3d.camTarget) return;
+    var xz = toLocalXZ(lastLocateLatLng[0], lastLocateLatLng[1]);
+    var groundY = sampleGridElevM(lastLocateLatLng[0], lastLocateLatLng[1]) * t3d.exagg;
+    t3d.camTarget.set(xz.x, groundY, xz.z);
+    if (t3d.camDist > 500) t3d.camDist = 500;
+    updateCamera3d();
   }
 
   function updateCamera3d() {
@@ -1562,6 +1606,8 @@
       if (locateWatchId !== null) stopLocate(); else startLocate();
     });
   }
+  var fs3dRecenterBtnEl = document.getElementById('fs3dRecenterBtn');
+  if (fs3dRecenterBtnEl) fs3dRecenterBtnEl.addEventListener('click', recenter3DOnLocation);
   // Layers menu: everything that used to be a spread-out row of
   // checkboxes/select/slider in the toolbar (network picker, show-routes,
   // show-trails, satellite, hill exaggeration) now lives in one dropdown
