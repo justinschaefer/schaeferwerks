@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SchaeferWerks</title>
-<meta name="description" content="SchaeferWerks — a Vietnam-era photo memorial for Wil Schaefer, and a GPX route explorer for the Santa Cruz &amp; UCSC trail network.">
+<meta name="description" content="SchaeferWerks — a Vietnam-era photo memorial for Wil Schaefer, a memorial for Theodore &amp; Samantha-Jane, and a GPX route explorer for the Santa Cruz &amp; UCSC trail network.">
 <link rel="canonical" href="https://schaeferwerks.com/">
 
 <meta property="og:type" content="website">
@@ -140,6 +140,11 @@ a.tile:hover .mount {
     radial-gradient(circle at 70% 25%, rgba(200,67,58,0.12), transparent 55%),
     linear-gradient(160deg, #1e2320 0%, #14120f 70%);
 }
+.frame.cats {
+  background:
+    radial-gradient(circle at 30% 70%, rgba(217,164,65,0.10), transparent 55%),
+    linear-gradient(160deg, #23201a 0%, #17140f 70%);
+}
 .frame-glyph {
   font-family: 'Special Elite', monospace;
   font-size: 15px;
@@ -218,6 +223,29 @@ footer a:hover { color: var(--accent-amber); border-color: var(--accent-amber); 
         <div class="tile-label">TRAIL TOOL</div>
         <div class="tile-title">GPX Route Explorer</div>
         <div class="tile-desc">Drop in any GPX file to see it plotted against the full UCSC &amp; Pogonip trail network, with distance, time, and elevation between any two points, trail labeling, and a searchable map.</div>
+      </div>
+    </a>
+
+    <a class="tile" href="/theo-and-sam/index.html">
+      <div class="mount">
+        <div class="frame cats">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="pawFade" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#E0889A"/>
+                <stop offset="100%" stop-color="#D9A441"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="50" cy="62" rx="17" ry="14" fill="#D9A441"/>
+            <ellipse cx="27" cy="42" rx="7" ry="9" transform="rotate(-20 27 42)" fill="#D9A441"/>
+            <ellipse cx="43" cy="34" rx="7" ry="9" transform="rotate(-6 43 34)" fill="#E0889A"/>
+            <ellipse cx="59" cy="34" rx="7" ry="9" transform="rotate(6 59 34)" fill="url(#pawFade)"/>
+            <ellipse cx="75" cy="42" rx="7" ry="9" transform="rotate(20 75 42)" fill="#D9A441"/>
+          </svg>
+        </div>
+        <div class="tile-label">MEMORIAL</div>
+        <div class="tile-title">Theodore &amp; Samantha&#8209;Jane</div>
+        <div class="tile-desc">The story of two cats who lived long, happy lives together &mdash; with the photo albums that chronicle it, from kittenhood to old age.</div>
       </div>
     </a>
 
