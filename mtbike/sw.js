@@ -4,7 +4,7 @@
 // next activate() delete the old one -- without a bump, a device that's
 // already cached this will keep serving the old files indefinitely, by
 // design (that's what makes it reliable with no signal).
-var CACHE_VERSION = 'v29';
+var CACHE_VERSION = 'v30';
 var CACHE_NAME = 'gpx-explorer-' + CACHE_VERSION;
 
 // Separate, capped cache for map tiles (see the fetch handler below for why
@@ -107,7 +107,27 @@ self.addEventListener('install', function(event){
         return Promise.all(PRECACHE_URLS.map(function(url){
           return fetch(url, { cache: 'reload' }).then(function(resp){
             if (!resp.ok) throw new Error('precache fetch failed: ' + url + ' (' + resp.status + ')');
-            return cache.put(url, resp);
+            // './' is the page shell -- exactly the entry the fetch handler
+            // below hands back for the app's own top-level navigation. If
+            // this particular fetch followed any redirect (Cloudflare's
+            // host/trailing-slash canonicalization can do this even when the
+            // requested URL already looks final), the stored Response keeps
+            // a "redirected" flag that Safari then refuses to let a service
+            // worker use to answer a navigation -- "Response served by
+            // service worker has redirections" -- even though the URL it
+            // resolved to is exactly right. Stripping the flag here means
+            // whatever gets precached is always safe to replay for a future
+            // navigation, matching the same rebuild the fetch handler does
+            // for anything fetched fresh at runtime.
+            var toCache = resp;
+            if (resp.redirected) {
+              toCache = new Response(resp.body, {
+                status: resp.status,
+                statusText: resp.statusText,
+                headers: resp.headers
+              });
+            }
+            return cache.put(url, toCache);
           });
         }));
       })
@@ -262,8 +282,31 @@ self.addEventListener('fetch', function(event){
       if (cached) return cached;
       return fetch(req).then(function(res){
         if (res && res.ok) {
-          var copy = res.clone();
+          var toRespond = res;
+          if (res.redirected) {
+            // Safari refuses to let a service worker fulfill a *navigation*
+            // with a Response whose URL list shows a redirect -- "Response
+            // served by service worker has redirections" -- even when the
+            // final URL is identical to what was requested and the page
+            // loads fine with the service worker bypassed (a plain reload
+            // works because that request either isn't routed through this
+            // handler's redirected copy or re-fetches cleanly). Cloudflare's
+            // own host/trailing-slash canonicalization (schaeferwerks.com ->
+            // www., /mtbike -> /mtbike/) is enough to make fetch()'s result
+            // here carry that flag even when event.request.url already looks
+            // canonical. Rebuilding a plain Response from the same body/
+            // status/headers strips the flag, so both what's served right
+            // now and what gets cached below are safe for a future
+            // navigation to reuse.
+            toRespond = new Response(res.body, {
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers
+            });
+          }
+          var copy = toRespond.clone();
           caches.open(CACHE_NAME).then(function(cache){ cache.put(req, copy); });
+          return toRespond;
         }
         return res;
       }).catch(function(){
