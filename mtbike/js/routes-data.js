@@ -73,10 +73,49 @@
     return pts;
   }
 
+  // A GPX file can have real elevation on every point except a short gap
+  // (e.g. a barometer/GPS glitch for a minute mid-ride) -- that used to zero
+  // out elevation for the WHOLE route (see README.txt, "Elevation missing
+  // on partial-gap GPX files"). This fills any null-ele points by linearly
+  // interpolating between the nearest valid points on either side (or
+  // flat-filling from the nearest valid point if the gap is at an end), so
+  // a route only loses elevation entirely when NONE of its points have it.
+  function fillElevationGaps(pts) {
+    var n = pts.length;
+    var ele = new Array(n);
+    for (var i = 0; i < n; i++) ele[i] = pts[i].ele;
+
+    var firstValid = -1;
+    for (i = 0; i < n; i++) { if (ele[i] !== null) { firstValid = i; break; } }
+    if (firstValid === -1) return ele; // no elevation anywhere in this file
+
+    for (i = 0; i < firstValid; i++) ele[i] = ele[firstValid];
+
+    var lastValid = firstValid;
+    for (i = firstValid + 1; i < n; i++) {
+      if (ele[i] !== null) { lastValid = i; continue; }
+      var j = i;
+      while (j < n && ele[j] === null) j++;
+      if (j === n) {
+        for (var k = i; k < n; k++) ele[k] = ele[lastValid];
+        break;
+      }
+      var span = j - lastValid;
+      for (var k2 = lastValid + 1; k2 < j; k2++) {
+        var frac = (k2 - lastValid) / span;
+        ele[k2] = ele[lastValid] + (ele[j] - ele[lastValid]) * frac;
+      }
+      i = j - 1;
+      lastValid = j;
+    }
+    return ele;
+  }
+
   function buildRoute(name, pts) {
     var n = pts.length;
     var hasTime = pts.every(function(p){ return p.t !== null; });
-    var hasEle = pts.every(function(p){ return p.ele !== null; });
+    var eleFilled = fillElevationGaps(pts);
+    var hasEle = eleFilled.some(function(v){ return v !== null; });
     var t0 = hasTime ? pts[0].t : null;
 
     var cumdistM = new Array(n);
@@ -94,7 +133,7 @@
     var rows = idxs.map(function(i){
       var p = pts[i];
       var tSec = hasTime ? (p.t - t0) / 1000 : i;
-      var eleFt = hasEle ? p.ele * 3.28084 : 0;
+      var eleFt = hasEle ? eleFilled[i] * 3.28084 : 0;
       var distMi = cumdistM[i] * 0.000621371;
       return [Math.round(tSec), Math.round(p.lat*100000)/100000, Math.round(p.lon*100000)/100000, Math.round(eleFt*10)/10, Math.round(distMi*10000)/10000];
     });
