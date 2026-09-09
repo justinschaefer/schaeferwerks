@@ -1331,7 +1331,16 @@
     iso3dShowRidesInput.disabled = !route;
     iso3dAllRoutesInput.disabled = !route;
     var showRides = route ? iso3dShowRidesInput.checked : false;
-    var showNetwork = route ? (iso3dShowNetworkInput.checked && !!currentTrailData()) : !!currentTrailData();
+    // FIXED 2026-09-08: this used to ignore the checkbox entirely whenever no
+    // route was loaded (showNetwork = !!currentTrailData(), full stop) -- which
+    // is exactly the common case opening this straight from a phone without
+    // dropping a GPX in first. Justin could turn "show all named trails" off on
+    // a computer (where testing almost always has a route loaded already) and
+    // it worked, but on his iPhone with no route loaded the checkbox had zero
+    // effect and trails always showed. Now the checkbox is honored either way;
+    // currentTrailData() still has to return something for there to be
+    // anything to draw at all.
+    var showNetwork = iso3dShowNetworkInput.checked && !!currentTrailData();
     var routeList = showRides ? (iso3dAllRoutesInput.checked ? routes : [route]) : [];
     var bboxRouteBasis = showRides ? routeList : (route ? [route] : []);
 
