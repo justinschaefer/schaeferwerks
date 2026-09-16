@@ -13,7 +13,7 @@
  */
   var ROUTES_KEY = 'gpxExplorerRoutes';
 
-  var routes = [];      // { name, rows, hasTime, hasEle, totalDistMi, totalTimeSec, pointCount }
+  var routes = [];      // { name, rows, hasTime, hasEle, totalDistMi, totalTimeSec, pointCount, startTime, importedAt }
   var activeIndex = -1;
 
   var sidebarList = document.getElementById('routeList');
@@ -38,6 +38,34 @@
       var raw = localStorage.getItem(ROUTES_KEY);
       routes = raw ? JSON.parse(raw) : [];
     } catch (e) { routes = []; }
+
+    // Migration (2026-09-16): routes saved before `importedAt` existed have
+    // neither that nor `startTime` on disk, so the sidebar has nothing to
+    // sort a just-loaded ride against -- it used to just get appended to
+    // the bottom of its park group, which is what "loaded a ride and can't
+    // find it" turned out to be (buried under everything older, not
+    // actually missing). Backfill importedAt for any route missing it,
+    // using its existing array position (routes.push order == the order
+    // they were originally imported in) so old routes keep their relative
+    // order relative to EACH OTHER, while still being sortable against
+    // anything imported from now on. One-time cost per route; only writes
+    // to localStorage if something actually needed backfilling.
+    var neededMigration = false;
+    for (var mi = 0; mi < routes.length; mi++) {
+      if (routes[mi].importedAt == null) {
+        routes[mi].importedAt = mi; // small ints, but consistent ordering is all that matters here
+        neededMigration = true;
+      }
+    }
+    if (neededMigration) saveRoutes();
+  }
+
+  // Best available "when did this ride happen" key for sorting: the GPX's
+  // own recorded start time when the file had one (real ride chronology,
+  // survives even if imported months later), else falling back to when it
+  // was imported into the app.
+  function routeSortKey(r) {
+    return (r.startTime != null) ? r.startTime : (r.importedAt || 0);
   }
 
   // ---- GPX parsing ----
@@ -145,7 +173,8 @@
       hasEle: hasEle,
       totalDistMi: cumdistM[n-1] * 0.000621371,
       totalTimeSec: hasTime ? (pts[n-1].t - t0) / 1000 : null,
-      pointCount: n
+      pointCount: n,
+      startTime: t0 // epoch ms of the ride's first point, or null if the GPX had no <time> data
     };
   }
 
@@ -319,6 +348,18 @@
     });
     var presentGroups = groupOrder.filter(function(id){ return groups[id] && groups[id].length; });
 
+    // Sort each park's routes newest-ride-first (2026-09-16 -- previously
+    // just import order, so a freshly loaded ride landed at the BOTTOM of
+    // its park's list, under everything else ever ridden there. "I loaded
+    // one and can't find it" was this: not actually missing, just off the
+    // bottom of a long list. Uses the ride's own recorded start time when
+    // the GPX has one (so it sorts correctly even for an old ride imported
+    // today), falling back to import order for older saved routes that
+    // predate this and for GPX files with no time data at all.
+    presentGroups.forEach(function(netId){
+      groups[netId].sort(function(a, b){ return routeSortKey(routes[b]) - routeSortKey(routes[a]); });
+    });
+
     // Always show the park header, even with just one group present -- a
     // single park's worth of routes still benefits from a clear "this is
     // what you're looking at" heading anchoring the list, which is the
@@ -428,6 +469,7 @@
       try {
         var pts = parseGPX(e.target.result);
         var route = buildRoute(file.name, pts);
+        route.importedAt = Date.now();
         routes.push(route);
         saveRoutes();
         activate(routes.length - 1);
