@@ -39,21 +39,39 @@
       routes = raw ? JSON.parse(raw) : [];
     } catch (e) { routes = []; }
 
-    // Migration (2026-09-16): routes saved before `importedAt` existed have
-    // neither that nor `startTime` on disk, so the sidebar has nothing to
-    // sort a just-loaded ride against -- it used to just get appended to
-    // the bottom of its park group, which is what "loaded a ride and can't
-    // find it" turned out to be (buried under everything older, not
-    // actually missing). Backfill importedAt for any route missing it,
-    // using its existing array position (routes.push order == the order
-    // they were originally imported in) so old routes keep their relative
-    // order relative to EACH OTHER, while still being sortable against
-    // anything imported from now on. One-time cost per route; only writes
-    // to localStorage if something actually needed backfilling.
+    // Migration (2026-09-16, corrected 2026-09-17): routes saved before
+    // `importedAt`/`startTime` existed have neither on disk. The first pass
+    // of this migration backfilled `importedAt` from each route's array
+    // position, on the assumption that import order roughly tracked ride
+    // order -- WRONG, confirmed against Justin's real saved data: his GPX
+    // files import as "Cycling_2026-08-01_...", "Cycling_2026-08-22_...",
+    // "Cycling_2026-08-24_...", "Cycling_2026-08-20_..." in THAT array
+    // order -- Aug 20th sitting after Aug 24th -- because he loads rides in
+    // whatever order he happens to pick files, not chronologically. Sorting
+    // by array position just reproduced that same already-wrong order.
+    // The actual fix: his GPX exports are all named
+    // "Cycling_YYYY-MM-DD_HH-MM-SS_..." (confirmed against all 20 of his
+    // saved routes, zero exceptions) -- that filename IS the real ride
+    // date/time and is available for every existing route without needing
+    // the original GPX again. Parse it and use it as `startTime` directly;
+    // only fall back to array position (old behavior) for a route whose
+    // name doesn't match (e.g. renamed via the sidebar's rename button).
+    var FILENAME_DATE_RE = /^Cycling_(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})-(\d{2})_/;
+    function parseDateFromFilename(name) {
+      var m = FILENAME_DATE_RE.exec(name || '');
+      if (!m) return null;
+      var d = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]);
+      return isNaN(d.getTime()) ? null : d.getTime();
+    }
     var neededMigration = false;
     for (var mi = 0; mi < routes.length; mi++) {
-      if (routes[mi].importedAt == null) {
-        routes[mi].importedAt = mi; // small ints, but consistent ordering is all that matters here
+      var r = routes[mi];
+      if (r.startTime == null) {
+        var fromName = parseDateFromFilename(r.name);
+        if (fromName != null) { r.startTime = fromName; neededMigration = true; }
+      }
+      if (r.importedAt == null) {
+        r.importedAt = mi; // last-resort fallback only, for names the pattern above can't parse
         neededMigration = true;
       }
     }
