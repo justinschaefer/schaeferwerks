@@ -1,0 +1,17 @@
+{
+  "name": "schaeferwerks-45b0",
+  "compatibility_date": "2026-09-04",
+  "main": "worker.js",
+  "assets": {
+    "directory": "./",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page"
+  },
+  // Coast Land Scout star ranks and passes. Wrangler creates the namespace on first deploy.
+  "kv_namespaces": [
+    { "binding": "COAST" }
+  ],
+  // Cloudflare Access only guards schaeferwerks.com, so keep the private /coast page off the other URLs.
+  "workers_dev": false,
+  "preview_urls": false
+}
