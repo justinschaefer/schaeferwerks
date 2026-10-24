@@ -1,7 +1,0 @@
-.git
-.gitignore
-.assetsignore
-wrangler.jsonc
-deploy.command
-worker.js
-coast/RESEARCH.md

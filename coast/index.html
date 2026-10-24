@@ -36,6 +36,8 @@ body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15
 header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px 24px}
 h1{font-family:var(--f-display);font-weight:700;font-size:2.2rem;letter-spacing:.01em;margin:0;line-height:1;text-wrap:balance}
 .sub{color:var(--muted);margin:.35rem 0 0;max-width:70ch}
+.fresh{display:inline-block;margin:.5rem 0 0;font-size:.85rem;font-weight:600;padding:3px 10px;border-radius:999px;color:var(--land);background:var(--land-bg)}
+.fresh.stale{color:var(--busy);background:var(--busy-bg)}
 .tally{display:flex;gap:18px;flex-wrap:wrap}
 .tally div{display:flex;flex-direction:column}
 .tally b{font-family:var(--f-mono);font-size:1.3rem;font-variant-numeric:tabular-nums}
@@ -111,6 +113,7 @@ body{margin:0}
     <div>
       <h1>Coast Land Scout</h1>
       <p class="sub">Houses and land on 1+ acre, plus cheap small lots (under $60k) to park an RV on, near the Oregon and SW Washington coast, within 40 miles of a mountain-bike trail system and about 4 hours of Portland. "Best fit" hides busy-road listings, red flags like wetland or no access, and anything over 10 miles from the ocean unless the deal is exceptional. Tap a row or a map dot to open it and rank it.</p>
+      <p class="fresh" id="fresh" role="status"></p>
     </div>
     <div class="tally" id="tally"></div>
   </header>
@@ -372,13 +375,31 @@ document.getElementById("dl").onclick = () => {
   a.download = "coast-land-scout.csv"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 };
 
+// When the Mac last published listings. It runs every morning, so over ~30 hours means a run was missed.
+function showFreshness(data){
+  const box = document.getElementById("fresh");
+  const t = data.updated ? new Date(data.updated) : data.asof ? new Date(data.asof+"T06:00") : null;
+  if(!t || isNaN(t)){ box.hidden = true; return; }
+  const hrs = (Date.now() - t) / 36e5;
+  const when = t.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"}) + (data.updated ? ", " + t.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}) : "");
+  const ago = hrs < 1 ? "under an hour ago" : hrs < 48 ? Math.round(hrs) + (Math.round(hrs)===1 ? " hour ago" : " hours ago") : Math.round(hrs/24) + " days ago";
+  const stale = hrs > 30;
+  box.className = "fresh" + (stale ? " stale" : "");
+  box.textContent = (stale ? "⚠ Not updated since " : "Updated ") + when + " (" + ago + ")" + (stale ? ". The Mac may be asleep or off; it catches up when it wakes." : "");
+}
+
 (async()=>{
   const get = async (u, fallback) => { try{ const r = await fetch(u, {cache:"no-cache"}); return r.ok ? await r.json() : fallback; }catch(e){ return fallback; } };
   const [data, map, notes] = await Promise.all([get("data.json", {rows:[]}), get("map.json", {}), get("notes.json", {listings:{}, areas:[]})]);
   ROWS = data.rows || []; ASOF = data.asof ? new Date(data.asof+"T12:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) : "—";
   MAP = map; NOTES = notes;
   document.getElementById("asof").textContent = ASOF;
+  showFreshness(data);
+  // Links in alert emails end in #<listing id>: open that listing with every filter cleared so it's visible.
+  const hid = decodeURIComponent(location.hash.slice(1));
+  if(hid && ROWS.some(r => r.id===hid)) Object.assign(state, {fit:"Everything", ocean:"Any", trail:"Any", road:"Any", lot:"Any", kind:"All", park:"Nearest", rv:"Any", st:"All", show:"Everything", open:hid});
   render();
+  if(state.open){ const row = document.getElementById("row-"+state.open); if(row) row.scrollIntoView({block:"center"}); }
   try{
     const res = await fetch(API, {credentials:"same-origin", cache:"no-store"});
     if(!res.ok) throw new Error((await res.json().catch(()=>({}))).error || res.status);
