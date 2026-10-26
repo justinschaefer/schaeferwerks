@@ -1,5 +1,5 @@
 #!/bin/bash
-cd "/Users/justinschaefer/Desktop/Claude/schaeferwerks" || { echo "Could not find the schaeferwerks folder."; read -p "Press enter to close..."; exit 1; }
+cd "$HOME/Desktop/Claude/schaeferwerks" || { echo "Could not find the schaeferwerks folder."; read -p "Press enter to close..."; exit 1; }
 
 echo "Getting the latest from GitHub (the daily land search pushes to it)..."
 git pull --rebase --autostash || { echo "Couldn't update from GitHub."; read -p "Press enter to close..."; exit 1; }

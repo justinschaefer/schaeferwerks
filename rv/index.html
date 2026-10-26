@@ -132,8 +132,8 @@ function render(){
   if ($('#hide').checked) r = r.filter(x => x.status !== 'pass' && x.status !== 'sold');
   const s = $('#sort').value;
   const P = x => x.price || 1e9, D = x => x.miles ?? 1e9;
-  const N = x => s === 'pick' && x.found === today ? 0 : 1;
-  r.sort((a,b) => N(a)-N(b) || (s==='price' ? P(a)-P(b) : s==='dist' ? D(a)-D(b) : s==='found' ? (String(b.found).localeCompare(String(a.found)) || (RANK[a.rating]??3)-(RANK[b.rating]??3) || b.score-a.score) : (RANK[a.rating]??3)-(RANK[b.rating]??3) || b.score-a.score));
+  // Best picks: top, then good, then maybe; within each, the best deal first (new or not).
+  r.sort((a,b) => (s==='price' ? P(a)-P(b) : s==='dist' ? D(a)-D(b) : s==='found' ? (String(b.found).localeCompare(String(a.found)) || (RANK[a.rating]??3)-(RANK[b.rating]??3) || b.score-a.score) : (RANK[a.rating]??3)-(RANK[b.rating]??3) || b.score-a.score));
   $('#count').textContent = r.length + ' of ' + rows.filter(x => x.fit !== 'no' && x.bath !== 'no').length + ' ads';
   const list = $('#list');
   if (!rows.length) { list.innerHTML = '<div class="empty">No listings yet. New finds are added here every morning.</div>'; return; }
