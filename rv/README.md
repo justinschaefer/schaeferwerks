@@ -12,8 +12,9 @@ schaeferwerks.com/rv lists used trailers for sale that the Jeep can tow. This fi
   The first load starts from `rv/seed-ratings.json`, which holds the passes from the old RV Deal Tracker on claude.ai.
   Those use the tracker's ids; the daily job lists them in a row's `aliases` when its link matches, and does the same
   for an ad that gets reposted under a new id, so a pass or star still shows.
-- `/rv` is private: the worker refuses requests that didn't come through Cloudflare Access, and the Access app that
-  protects `/coast` also needs the `rv` path.
+- Not private yet: like `/coast`, `/rv` isn't behind Cloudflare Access, so anyone who finds it can see it (both pages
+  tell search engines not to list them). Ranks save from the page itself or through Access. To make both private, add
+  `coast` and `rv` paths to a Cloudflare Access app for schaeferwerks.com.
 
 ## Row format (`data.json`)
 

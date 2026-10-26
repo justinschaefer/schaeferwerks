@@ -5,9 +5,7 @@
   "assets": {
     "directory": "./",
     "binding": "ASSETS",
-    "not_found_handling": "404-page",
-    // The worker checks for Cloudflare Access sign-in before serving anything under /rv.
-    "run_worker_first": ["/rv", "/rv/*"]
+    "not_found_handling": "404-page"
   },
   // Star ranks and passes for Coast Land Scout and RV Scout (keys "ratings" and "rv-ratings"). Wrangler creates the namespace on first deploy.
   "kv_namespaces": [

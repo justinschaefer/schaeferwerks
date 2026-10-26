@@ -1,6 +1,7 @@
 // Serves the static site, plus a small API for star ranks and passes on Coast Land Scout (/coast)
-// and RV Scout (/rv). Both pages are meant to sit behind Cloudflare Access, which adds the
-// Cf-Access-Authenticated-User-Email header; requests without it are refused.
+// and RV Scout (/rv). Ranks can be saved by a request that came through Cloudflare Access (it adds the
+// Cf-Access-Authenticated-User-Email header) or by the page itself (the browser marks those same-origin).
+// Neither page is behind Access yet, so anyone who finds a page can see it.
 
 // Each page keeps its ranks under its own key in the COAST KV namespace.
 const APPS = {
@@ -13,18 +14,16 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/coast/api/ratings") return ratings(request, env, url, APPS.coast);
     if (url.pathname === "/rv/api/ratings") return ratings(request, env, url, APPS.rv);
-    // /rv runs through this worker first (see run_worker_first in wrangler.jsonc), so the page and
-    // its data stay private even if the Access rule for /rv is missing.
-    if ((url.pathname === "/rv" || url.pathname.startsWith("/rv/")) && !signedIn(request)) {
-      return new Response("RV Scout is private. Add the rv path to the Cloudflare Access app that protects /coast.", {
-        status: 403, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
-      });
-    }
     return env.ASSETS.fetch(request);
   },
 };
 
-const signedIn = (request) => !!request.headers.get("cf-access-authenticated-user-email");
+// Through Cloudflare Access, or from the page's own scripts (browsers send Sec-Fetch-Site and, on a POST,
+// Origin; another site's page can't make them say same-origin).
+const allowed = (request, url) =>
+  !!request.headers.get("cf-access-authenticated-user-email") ||
+  (request.headers.get("sec-fetch-site") === "same-origin" &&
+    (request.method === "GET" || request.headers.get("origin") === url.origin));
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -42,8 +41,8 @@ async function loadRatings(env, url, app) {
 }
 
 async function ratings(request, env, url, app) {
-  if (!signedIn(request)) {
-    return json({ error: `Turn on Cloudflare Access for ${app.page} to save ranks.` }, 403);
+  if (!allowed(request, url)) {
+    return json({ error: `Open ${app.page} on schaeferwerks.com to save ranks.` }, 403);
   }
   if (request.method === "GET") return json(await loadRatings(env, url, app));
   if (request.method !== "POST") return json({ error: "Use GET or POST." }, 405);
