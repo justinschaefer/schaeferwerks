@@ -6,310 +6,199 @@
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<title>RV Scout</title>
+<title>RV Deal Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@600;800&family=Source+Sans+3:wght@400;600&family=Overpass+Mono:wght@500&display=swap">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <style>
-/* Layout: same ledger as Coast Land Scout — header strip with tallies, filter rail, one wide sortable table; rows expand to the ad */
+/* Layout: one column of listing rows, highway-sign header, filter chips; rows go two-column on wide screens */
 :root{
-  --busy:#a3271c; --busy-bg:#f7dcd8;
-  --bg:#f3f4ef; --surface:#ffffff; --fg:#1d2620; --muted:#5d6a61; --line:#d9ded5;
-  --accent:#2f5d46; --accent-ink:#ffffff; --sea:#1f5f7a; --star:#c98a14;
-  --th:#8a4b1c; --th-bg:#f6e8dc; --as:#1f5f7a; --as-bg:#dfecf2; --tt:#4d6a2a; --tt-bg:#e6eedb;
-  --pass:#9a9f99; --row-hover:#f7f8f3;
-  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
-  --f-body:"Source Sans 3",system-ui,-apple-system,sans-serif;
-  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --bg:#f3f5f2; --surface:#ffffff; --fg:#1d2420; --muted:#5d6a63; --line:#d9dfdb;
+  --accent:#0b6b46; --accent-ink:#ffffff; --top:#b8860b; --good:#2f6fae; --warn:#a14a2a;
+  --display:"Overpass","Arial Narrow",system-ui,sans-serif;
+  --body:"Source Sans 3",system-ui,-apple-system,sans-serif;
+  --mono:"Overpass Mono",ui-monospace,Menlo,monospace;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#131915; --surface:#1a211c; --fg:#e4e9e3; --muted:#9aa79d; --line:#2c362f;
-  --accent:#7fbf9b; --accent-ink:#0f1a13; --sea:#7cc0dc; --star:#e8b04a;
-  --th:#f0b98c; --th-bg:#3a2a1d; --as:#9fd0e6; --as-bg:#1d3440; --tt:#b9d48f; --tt-bg:#26321b;
-  --pass:#6b736d; --row-hover:#1f2822; --busy:#ff8f80; --busy-bg:#3d1d19; color-scheme:dark}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121614; --surface:#1a201d; --fg:#e6ebe8; --muted:#9aa7a0; --line:#2c3531;
+  --accent:#3fae7f; --accent-ink:#0c1410; --top:#e0b54a; --good:#6fa8e0; --warn:#e08a66; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#131915; --surface:#1a211c; --fg:#e4e9e3; --muted:#9aa79d; --line:#2c362f;
-  --accent:#7fbf9b; --accent-ink:#0f1a13; --sea:#7cc0dc; --star:#e8b04a;
-  --th:#f0b98c; --th-bg:#3a2a1d; --as:#9fd0e6; --as-bg:#1d3440; --tt:#b9d48f; --tt-bg:#26321b;
-  --pass:#6b736d; --row-hover:#1f2822; --busy:#ff8f80; --busy-bg:#3d1d19; color-scheme:dark}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
-.wrap{max-width:1500px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:flex;flex-direction:column;gap:16px}
-header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px 24px}
-h1{font-family:var(--f-display);font-weight:700;font-size:2.2rem;letter-spacing:.01em;margin:0;line-height:1;text-wrap:balance}
-.sub{color:var(--muted);margin:.35rem 0 0;max-width:75ch}
-.fresh{display:inline-block;margin:.5rem 0 0;font-size:.85rem;font-weight:600;padding:3px 10px;border-radius:999px;color:var(--tt);background:var(--tt-bg)}
-.fresh.stale{color:var(--busy);background:var(--busy-bg)}
-.warn{margin:.5rem 0 0;font-size:.85rem;color:var(--busy);max-width:75ch}
-.tally{display:flex;gap:18px;flex-wrap:wrap}
-.tally div{display:flex;flex-direction:column}
-.tally b{font-family:var(--f-mono);font-size:1.3rem;font-variant-numeric:tabular-nums}
-.tally span{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.rail{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding-block:10px;border-block:1px solid var(--line)}
-.grp{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
-.grp>span{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:4px}
-.chip{font:600 .85rem var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:5px 11px;border-radius:999px;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.chip:focus-visible,.star:focus-visible,.pass:focus-visible,a:focus-visible,th button:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
-.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px}
-table{border-collapse:collapse;width:100%;min-width:1100px}
-th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
-th{position:sticky;top:0;background:var(--surface);z-index:1}
-th button{all:unset;cursor:pointer;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);white-space:nowrap}
-th button.on{color:var(--fg);font-weight:700}
-td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:.86rem}
-tbody tr.main{cursor:pointer}
-tbody tr.main:hover{background:var(--row-hover)}
-tr.passed td{color:var(--pass)}
-tr.passed .ad a{color:var(--pass)}
-.ad{min-width:260px}
-.ad a{color:var(--fg);font-weight:600;text-decoration:none}
-.ad small{display:block;color:var(--muted)}
-.new{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.06em;padding:1px 6px;border-radius:3px;background:var(--star);color:var(--surface);margin-right:6px;vertical-align:1px}
-tr.isnew td{background:color-mix(in srgb,var(--star) 10%,var(--surface))}
-.kind{display:inline-block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:3px;white-space:nowrap}
-.k-th{color:var(--th);background:var(--th-bg)} .k-as{color:var(--as);background:var(--as-bg)} .k-tt{color:var(--tt);background:var(--tt-bg)}
-.pick{display:inline-block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:3px;color:var(--muted)}
-.pick.top{color:var(--star)} .pick.good{color:var(--accent)}
-.tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
-.tag{font-size:.7rem;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:0 5px}
-.tag.drop{color:var(--sea);border-color:var(--sea);font-weight:700}
-.tag.target{color:var(--accent);border-color:var(--accent);font-weight:700}
-.tag.warn{background:var(--busy-bg);color:var(--busy);border-color:transparent}
-.fit{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:3px;white-space:nowrap}
-.f-yes{color:var(--tt);background:var(--tt-bg)} .f-check{color:var(--th);background:var(--th-bg)} .f-no{color:var(--busy);background:var(--busy-bg)}
-.links{display:flex;gap:8px;white-space:nowrap}
-.links a{color:var(--sea);font-weight:600}
-.rate{display:flex;gap:2px;align-items:center;white-space:nowrap}
-.star{all:unset;cursor:pointer;font-size:1.25rem;line-height:1;color:var(--line);padding:2px}
-.star.on{color:var(--star)}
-.pass{all:unset;cursor:pointer;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:2px 6px;margin-left:6px}
-.pass.on{background:var(--pass);color:var(--surface);border-color:var(--pass)}
-.score{font-weight:600;color:var(--accent)}
-tr.detail td{background:var(--row-hover);color:var(--fg)}
-tr.detail p{margin:0 0 6px;max-width:95ch;white-space:pre-line}
-tr.detail .meta{color:var(--muted);font-size:.85rem}
-.verdict{border-left:3px solid var(--accent);padding:6px 10px;margin:8px 0;background:var(--surface);border-radius:0 4px 4px 0;max-width:95ch}
-.note{color:var(--muted);font-size:.85rem;max-width:95ch}
-.foot{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
-#dl{font:600 .85rem var(--f-body);border:1px solid var(--accent);background:transparent;color:var(--accent);padding:6px 12px;border-radius:4px;cursor:pointer}
-#sync{font-size:.8rem;color:var(--muted)}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  --bg:#121614; --surface:#1a201d; --fg:#e6ebe8; --muted:#9aa7a0; --line:#2c3531;
+  --accent:#3fae7f; --accent-ink:#0c1410; --top:#e0b54a; --good:#6fa8e0; --warn:#e08a66; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:16px/1.45 var(--body)}
+.wrap{max-width:960px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:flex;flex-direction:column;gap:18px}
+header.sign{background:var(--accent);color:var(--accent-ink);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:4px;border:3px solid var(--accent-ink);outline:2px solid var(--accent)}
+header.sign h1{font:800 clamp(24px,5vw,34px)/1.05 var(--display);margin:0;letter-spacing:.01em;text-wrap:balance}
+header.sign p{margin:0;font-size:15px;opacity:.92}
+.stamp{display:flex;flex-wrap:wrap;gap:4px 18px;font:600 14px var(--body)!important;opacity:1!important}
+.specs{font:500 12px var(--mono);letter-spacing:.04em;text-transform:uppercase;opacity:.9}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font:600 15px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;min-height:40px}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.chip:focus-visible,.act:focus-visible,a:focus-visible{outline:3px solid var(--good);outline-offset:2px}
+.bar label{font-size:14px;color:var(--muted);display:flex;gap:6px;align-items:center}
+select{font:600 15px var(--body);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);min-height:40px}
+.count{font:500 13px var(--mono);color:var(--muted);margin-left:auto}
+.list{display:flex;flex-direction:column;gap:10px}
+.row{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:6px 16px;min-width:0}
+.row.dim{opacity:.55}
+.row .main{min-width:0;display:flex;flex-direction:column;gap:4px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font:500 11px var(--mono);text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:4px;border:1px solid currentColor}
+.tag.top{color:var(--top)} .tag.good{color:var(--good)} .tag.maybe{color:var(--muted)} .tag.kind{color:var(--accent)}
+.tag.st-interested{background:var(--good);color:var(--surface);border-color:var(--good)}
+.tag.st-sold,.tag.st-pass{color:var(--warn)}
+.tag.new{background:var(--top);color:var(--surface);border-color:var(--top)}
+.title{font:800 19px/1.2 var(--display);margin:0;text-wrap:balance}
+.title a{color:var(--fg);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.title a:hover{text-decoration-color:var(--accent)}
+.meta{color:var(--muted);font-size:14px}
+.note{font-size:15px}
+.side{display:flex;flex-direction:column;align-items:flex-end;gap:8px;text-align:right}
+.price{font:800 24px/1 var(--display);font-variant-numeric:tabular-nums}
+.was{font:500 12px var(--mono);color:var(--muted);text-decoration:line-through}
+.acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.act{font:600 14px var(--body);border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:8px;padding:7px 11px;cursor:pointer;min-height:38px}
+.act.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:28px 18px;color:var(--muted);text-align:center}
+@media (max-width:560px){.row{grid-template-columns:1fr}.side{align-items:flex-start;text-align:left;flex-direction:row;flex-wrap:wrap;justify-content:space-between;width:100%}.acts{justify-content:flex-start}}
+@media (prefers-reduced-motion:no-preference){.row{transition:opacity .2s}}
+.ro .acts{display:none}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div>
-      <h1>RV Scout</h1>
-      <p class="sub">Used trailers the Jeep can tow (under 25 ft, 7,200 lb loaded, about 720 lb on the tongue) with a bathroom, from Facebook Marketplace, Craigslist, RV Trader and Airstream Marketplace within about a day's drive of Portland, plus the Flagstaff E-Pro E19TH/E19FBTH and narrow Wolf Pup 18RJB/Black Label anywhere in the US. "Fits the Jeep" hides ads that are too heavy, too long or have no bathroom. Tap a row to open the ad and rank it.</p>
-      <p class="fresh" id="fresh" role="status"></p>
-      <p class="warn" id="warn" hidden></p>
-    </div>
-    <div class="tally" id="tally"></div>
+  <header class="sign">
+    <span class="specs">Portland, OR · Jeep tow limit 7,200 lb · under 25 ft · bathroom</span>
+    <h1>RV Deal Tracker</h1>
+    <p>Every ad the daily search finds on Facebook, Craigslist, RV Trader and Airstream Marketplace, with links. New ones are added each morning. Tap Interested, Pass or Sold to sort them.</p>
+    <p class="stamp"><span id="now"></span><span id="upd">Last updated: loading…</span></p>
+    <p class="stamp" id="warn" hidden></p>
   </header>
 
-  <div class="rail">
-    <div class="grp" id="g-fit"><span>View</span></div>
-    <div class="grp" id="g-pick"><span>Pick</span></div>
-    <div class="grp" id="g-kind"><span>Type</span></div>
-    <div class="grp" id="g-model"><span>Model</span></div>
-    <div class="grp" id="g-dist"><span>Distance</span></div>
-    <div class="grp" id="g-price"><span>Price</span></div>
-    <div class="grp" id="g-seller"><span>Seller</span></div>
-    <div class="grp" id="g-src"><span>Source</span></div>
-    <div class="grp" id="g-show"><span>Show</span></div>
+  <div class="bar" role="group" aria-label="Filter by type">
+    <button class="chip" id="f-all" data-f="all" aria-pressed="true">All</button>
+    <button class="chip" id="f-th" data-f="Toy hauler" aria-pressed="false">Toy haulers</button>
+    <button class="chip" id="f-as" data-f="Airstream" aria-pressed="false">Airstreams</button>
+    <button class="chip" id="f-wp" data-f="t:wolf pup" aria-pressed="false">Wolf Pups</button>
+    <button class="chip" id="f-rp" data-f="t:r-pod" aria-pressed="false">R-Pods</button>
+    <button class="chip" id="f-ep" data-f="t:e-pro|19fbth|e19" aria-pressed="false">E-Pros</button>
+    <button class="chip" id="f-tt" data-f="Travel trailer" aria-pressed="false">Other trailers</button>
+    <button class="chip" id="f-int" data-f="interested" aria-pressed="false">My interested</button>
+  </div>
+  <div class="bar">
+    <label for="sort">Sort
+      <select id="sort">
+        <option value="found">Newest found</option>
+        <option value="pick">Best picks first</option>
+        <option value="price">Lowest price</option>
+        <option value="dist">Closest</option>
+      </select>
+    </label>
+    <label for="hide"><input type="checkbox" id="hide" checked> Hide passed &amp; sold</label>
+    <label for="big"><input type="checkbox" id="big"> Show ones too big for the Jeep or with no bathroom</label>
+    <span class="count" id="count"></span>
   </div>
 
-  <div class="tablebox">
-    <table>
-      <thead><tr id="thead"></tr></thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
-
-  <div class="foot">
-    <p class="note">Deal score weighs the price against the usual asking price for the same model (from every ad seen in the last 6 months), whether it's one of the target models, a toy hauler, fits the Jeep and has a bathroom, and the distance. Specs come from the model table in ~/RVScout/rvscout.py (looked up on rvguide.com) or, failing that, from the ad; "Check" means no specs were found, so look up the floorplan before going. "Toy hauler" means the model has a rear ramp door. Distance is a straight line from Portland (from the ad's map pin, or its town). Ads that drop out of the searches are re-checked each morning and stay listed while they're still for sale. Updated <span id="asof"></span>. NEW marks ads first seen in the last 7 days. Passes you made in the old RV Deal Tracker carry over, and so do ranks on an ad that gets reposted.</p>
-    <div class="grp"><span id="sync"></span><button id="dl" type="button">Download spreadsheet (CSV)</button></div>
+  <div class="list" id="list">
+    <div class="empty">Loading listings… New finds are added every morning.</div>
   </div>
 </div>
 
 <script>
-let ROWS = [], ASOF = "";
-const API = "/rv/api/ratings";
-const KINDS = ["All","Toy hauler","Airstream","Travel trailer"];
-const KCLASS = {"Toy hauler":"k-th","Airstream":"k-as","Travel trailer":"k-tt"};
-// Model chips match the ad title, like the old tracker's filter buttons.
-const MODELS = {"All":null,"Targets":"target","E-Pro":/e-?\s?pro|19\s?fbth|e-?19\s?th/i,"Wolf Pup":/wolf\s?pup|18\s?rjb/i,"R-Pod":/r-?\s?pod/i,"Airstream":/airstream/i};
-const FIT_LABEL = {yes:"Fits", check:"Check", no:"Too big"};
-const SOURCES = ["All","Facebook","Craigslist","RV Trader","Airstream Marketplace"];
-const state = {fit:"Fits the Jeep", pick:"Any", kind:"All", model:"All", dist:"Any", price:"Any", seller:"Any", src:"All", show:"Active", sort:"score", dir:-1, open:null};
-let ratings = {};
+// The RV Deal Tracker page, now fed by the daily search on the MacBook Pro (data.json) instead of Claude.
+// Interested / Pass / Sold are saved on schaeferwerks.com through the same ranks API as Coast Land Scout,
+// which stores {stars, pass}: Interested = 5 stars, Pass = pass, Sold = pass with 1 star.
+const $ = s => document.querySelector(s);
+const API = '/rv/api/ratings';
+let rows = [], filter = 'all', ratings = {}, data = {};
+const RANK = {top:0, good:1, maybe:2};
+try { const s = JSON.parse(localStorage.getItem('rvt-ui2')||'{}'); if (s.sort) $('#sort').value = s.sort; if (s.hide===false) $('#hide').checked = false; if (s.big) $('#big').checked = true; } catch(e){}
+function saveUi(){ try{ localStorage.setItem('rvt-ui2', JSON.stringify({sort:$('#sort').value, hide:$('#hide').checked, big:$('#big').checked})); }catch(e){} }
+const money = n => n ? '$' + Number(n).toLocaleString('en-US') : 'Call';
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const loc = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today = loc(new Date()), yday = loc(new Date(Date.now()-864e5));
 
-try{ const s = JSON.parse(localStorage.getItem("rvs-view")||"{}"); Object.assign(state, s, {open:null}); }catch(e){}
-function saveView(){ try{ localStorage.setItem("rvs-view", JSON.stringify(state)); }catch(e){} }
-
-const fmt$ = n => n==null ? "—" : "$" + Math.round(n).toLocaleString("en-US");
-const fmtN = n => n==null ? "—" : Math.round(n).toLocaleString("en-US");
-
-const COLS = [
-  ["score","Deal"],["kind","Type"],["price","Price"],["title","Ad"],["fit","Jeep"],["length","Length"],
-  ["gvwr","Max lb"],["bath","Bath"],["miles","Away"],["seller","Seller"],["first","Found"],["links","Links"]
-];
-function el(tag, attrs={}, ...kids){ const e=document.createElement(tag); for(const [k,v] of Object.entries(attrs)){ if(k==="class") e.className=v; else if(k.startsWith("on")) e.addEventListener(k.slice(2),v); else e.setAttribute(k,v);} for(const k of kids){ if(k==null) continue; e.append(k.nodeType?k:document.createTextNode(k)); } return e; }
-
-function chips(){
-  const mk=(gid,key,vals)=>{ const g=document.getElementById(gid); g.querySelectorAll("button").forEach(b=>b.remove());
-    for(const v of vals){ g.append(el("button",{class:"chip",type:"button","aria-pressed":String(state[key]===v),onclick:()=>{state[key]=v; saveView();render();}},v)); } };
-  mk("g-fit","fit",["Fits the Jeep","Everything"]); mk("g-pick","pick",["Any","Top picks","Top + good"]); mk("g-kind","kind",KINDS);
-  mk("g-model","model",Object.keys(MODELS)); mk("g-dist","dist",["Any","≤100 mi","≤300 mi","≤600 mi"]); mk("g-price","price",["Any","≤$15k","≤$25k","≤$40k"]);
-  mk("g-seller","seller",["Any","Private","Dealer"]); mk("g-src","src",SOURCES); mk("g-show","show",["Active","New this week","Ranked","Passed","Everything"]);
-}
-
-function head(){
-  const tr=document.getElementById("thead"); tr.innerHTML="";
-  for(const [k,label] of COLS){
-    const sortable = k!=="links";
-    const th=el("th",{});
-    if(sortable){ th.append(el("button",{type:"button",class: state.sort===k?"on":"",onclick:()=>{ if(state.sort===k) state.dir*=-1; else {state.sort=k; state.dir = ["score","first"].includes(k)?-1:1;} saveView(); render(); }}, label + (state.sort===k?(state.dir>0?" ▲":" ▼"):""))); }
-    else th.append(el("button",{type:"button",tabindex:"-1"},label));
-    tr.append(th);
-  }
-}
-
-// A rank saved under today's id, or under an earlier id for the same ad (the old RV Deal Tracker, or a repost).
-function rOf(r){ if(ratings[r.id]) return ratings[r.id]; for(const a of (r.aliases||[])) if(ratings[a]) return ratings[a]; return {}; }
-async function setRating(r, patch){
-  const prev = ratings[r.id];
-  ratings[r.id] = Object.assign({}, rOf(r), patch);
-  render(); setSync("Saving…");
-  try{
-    const res = await fetch(API, {method:"POST", headers:{"content-type":"application/json"}, credentials:"same-origin", body:JSON.stringify({id:r.id, stars:ratings[r.id].stars||0, pass:!!ratings[r.id].pass})});
-    if(!res.ok) throw new Error((await res.json().catch(()=>({}))).error || res.status);
-    ratings = await res.json(); render(); setSync("Ranks saved to schaeferwerks.com");
-  }catch(e){
-    if(prev) ratings[r.id]=prev; else delete ratings[r.id];
-    render(); setSync("Couldn't save that rank: " + e.message);
-  }
-}
-function setSync(t){ document.getElementById("sync").textContent=t; }
-
-function visible(){
-  return ROWS.filter(r=>{
-    const rt=rOf(r);
-    if(state.fit==="Fits the Jeep" && (r.fit==="no" || r.bath==="no")) return false;
-    if(state.pick==="Top picks" && r.rating!=="top") return false;
-    if(state.pick==="Top + good" && !["top","good"].includes(r.rating)) return false;
-    if(state.kind!=="All" && r.kind!==state.kind) return false;
-    const m=MODELS[state.model]; if(m==="target" ? !r.target : m && !m.test(r.title)) return false;
-    const dl={"≤100 mi":100,"≤300 mi":300,"≤600 mi":600}[state.dist]; if(dl && !(r.miles!=null && r.miles<=dl)) return false;
-    const pl={"≤$15k":15000,"≤$25k":25000,"≤$40k":40000}[state.price]; if(pl && !(r.price && r.price<=pl)) return false;
-    if(state.seller!=="Any" && r.seller!==state.seller) return false;
-    if(state.src!=="All" && r.source!==state.src) return false;
-    if(state.show==="Active" && rt.pass) return false;
-    if(state.show==="Ranked" && !(rt.stars>0)) return false;
-    if(state.show==="New this week" && !(r.isNew||r.dropFrom)) return false;
-    if(state.show==="Passed" && !rt.pass) return false;
-    return true;
-  }).sort((a,b)=>{
-    const k=state.sort; let va,vb;
-    if(k==="score" && a.isNew!==b.isNew){ return a.isNew?-1:1; }
-    else if(k==="fit"){ const o={yes:0,check:1,no:2}; va=o[a.fit]; vb=o[b.fit]; }
-    else if(k==="bath"){ const o={yes:0,"?":1,no:2}; va=o[a.bath]; vb=o[b.bath]; }
-    else { va=a[k]; vb=b[k]; }
-    if(va==null) return 1; if(vb==null) return -1;
-    return (typeof va==="string" ? va.localeCompare(vb) : va-vb) * state.dir;
-  });
-}
+// A mark saved under this ad's id, or under an earlier id for it (the old tracker's, or before a repost).
+function mark(x){ if (ratings[x.id]) return ratings[x.id]; for (const a of (x.aliases||[])) if (ratings[a]) return ratings[a]; return {}; }
+function statusOf(x){ const m = mark(x); return m.pass ? (m.stars===1 ? 'sold' : 'pass') : (m.stars ? 'interested' : 'new'); }
 
 function render(){
-  chips(); head();
-  const list=visible(); const tb=document.getElementById("tbody"); tb.innerHTML="";
-  for(const r of list){
-    const rt=rOf(r);
-    const rate=el("div",{class:"rate"});
-    for(let i=1;i<=5;i++) rate.append(el("button",{type:"button",class:"star"+((rt.stars||0)>=i?" on":""),"aria-label":i+" star"+(i>1?"s":""),onclick:e=>{e.stopPropagation(); setRating(r,{stars: rt.stars===i?0:i, pass:false});}},"★"));
-    rate.append(el("button",{type:"button",class:"pass"+(rt.pass?" on":""),onclick:e=>{e.stopPropagation(); setRating(r,{pass:!rt.pass, stars: rt.pass?rt.stars:0});}},"Pass"));
-    const tags=el("div",{class:"tags"});
-    if(r.target) tags.append(el("span",{class:"tag target"},"target model"));
-    if(r.family && !/\(other\)$/.test(r.family)) tags.append(el("span",{class:"tag"},r.family));
-    (r.tags||[]).forEach(t=>tags.append(el("span",{class:"tag"+(/pending/.test(t)?" warn":"")},t)));
-    if(r.dropFrom) tags.append(el("span",{class:"tag drop"},"↓ price drop this week, was "+fmt$(r.dropFrom)));
-    if(r.typical && r.price) tags.append(el("span",{class:"tag"},"usual "+fmt$(r.typical)));
-    const tr=el("tr",{id:"row-"+r.id,class:"main"+(rt.pass?" passed":"")+(r.isNew?" isnew":""),onclick:()=>{state.open = state.open===r.id?null:r.id; render();}},
-      el("td",{},el("span",{class:"num score"},String(Math.round(r.score))),el("small",{class:"pick "+r.rating,style:"display:block"},r.rating==="top"?"Top pick":r.rating)),
-      el("td",{},el("span",{class:"kind "+KCLASS[r.kind]},r.kind)),
-      el("td",{class:"num"},fmt$(r.price)),
-      el("td",{class:"ad"},rt.stars?el("span",{class:"tag",style:"color:var(--accent)"},"★".repeat(rt.stars)+" "):null,rt.pass?el("span",{class:"tag"},"Passed "):null,r.isNew?el("span",{class:"new"},"NEW "+new Date(r.first+"T12:00").toLocaleDateString("en-US",{month:"short",day:"numeric"})):null,el("a",{href:r.url,target:"_blank",rel:"noopener",onclick:e=>e.stopPropagation()},r.title||"(no title)"),el("small",{},(r.location||r.site||"")+" · "+r.source),tags),
-      el("td",{},el("span",{class:"fit f-"+r.fit,title:r.fit_why},FIT_LABEL[r.fit]||r.fit)),
-      el("td",{class:"num"},r.length?r.length+" ft":"—"),
-      el("td",{class:"num"},fmtN(r.gvwr)),
-      el("td",{},r.bath==="yes"?"Yes":r.bath==="no"?el("span",{class:"fit f-no"},"No"):"?"),
-      el("td",{class:"num"},r.miles==null?"—":fmtN(r.miles)+" mi"),
-      el("td",{},r.seller),
-      el("td",{class:"num"},r.first?new Date(r.first+"T12:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}):"—"),
-      el("td",{},el("div",{class:"links"},el("a",{href:r.url,target:"_blank",rel:"noopener",onclick:e=>e.stopPropagation()},{"Airstream Marketplace":"Airstream Mkt"}[r.source]||r.source),el("a",{href:"https://www.google.com/search?q="+encodeURIComponent(((r.year||"")+" "+(r.family&&!/\(other\)$/.test(r.family)?r.family:r.title)+" specs rvguide").trim()),target:"_blank",rel:"noopener",onclick:e=>e.stopPropagation()},"Specs")))
-    );
-    tb.append(tr);
-    if(state.open===r.id){
-      tb.append(el("tr",{class:"detail"},el("td",{colspan:String(COLS.length)},
-        el("div",{style:"display:flex;align-items:center;gap:10px;margin-bottom:8px"},el("b",{},"My rank"),rate),
-        el("div",{class:"verdict"},el("p",{},r.note||r.fit_why)),
-        r.old_note?el("p",{class:"meta"},"From the old RV Deal Tracker: "+r.old_note):null,
-        r.attrs?el("p",{class:"meta"},r.attrs):null,
-        el("p",{},r.remarks||"No ad text."),
-        el("p",{class:"meta"},[r.location,r.source==="Craigslist"&&r.site?r.site+".craigslist.org":r.source,r.seller,r.posted?"posted "+r.posted:null,r.lat!=null?r.lat.toFixed(3)+", "+r.lon.toFixed(3):null].filter(Boolean).join(" · ")))));
-    }
-  }
-  if(!list.length) tb.append(el("tr",{},el("td",{colspan:String(COLS.length),class:"note"}, !ROWS.length?"No ads yet. The Mac publishes them every morning.":state.show==="Ranked"?"Nothing ranked yet. Tap a star on any ad.":state.show==="New this week"?"No new ads or price drops in the last 7 days.":"No ads match these filters.")));
-  const all=ROWS;
-  const t=document.getElementById("tally"); t.innerHTML="";
-  [["New this week",all.filter(r=>r.isNew).length],["Drops this week",all.filter(r=>r.dropFrom).length],["Ads",all.length],...["Facebook","Craigslist","RV Trader"].map(s=>[s,all.filter(r=>r.source===s).length]),["Fit the Jeep",all.filter(r=>r.fit==="yes").length],["Top picks",all.filter(r=>r.rating==="top").length],["Ranked",all.filter(r=>rOf(r).stars>0).length]].forEach(([l,n])=>t.append(el("div",{},el("b",{},String(n)),el("span",{},l))));
+  let r = rows.slice();
+  if (!$('#big').checked) r = r.filter(x => x.fit !== 'no' && x.bath !== 'no');
+  if (filter === 'interested') r = r.filter(x => x.status === 'interested');
+  else if (filter.startsWith('t:')) { const re = new RegExp(filter.slice(2), 'i'); r = r.filter(x => re.test(x.title || '')); }
+  else if (filter !== 'all') r = r.filter(x => x.kind === filter);
+  if ($('#hide').checked) r = r.filter(x => x.status !== 'pass' && x.status !== 'sold');
+  const s = $('#sort').value;
+  const P = x => x.price || 1e9, D = x => x.miles ?? 1e9;
+  const N = x => s === 'pick' && x.found === today ? 0 : 1;
+  r.sort((a,b) => N(a)-N(b) || (s==='price' ? P(a)-P(b) : s==='dist' ? D(a)-D(b) : s==='found' ? (String(b.found).localeCompare(String(a.found)) || (RANK[a.rating]??3)-(RANK[b.rating]??3) || b.score-a.score) : (RANK[a.rating]??3)-(RANK[b.rating]??3) || b.score-a.score));
+  $('#count').textContent = r.length + ' of ' + rows.length + ' ads';
+  const list = $('#list');
+  if (!rows.length) { list.innerHTML = '<div class="empty">No listings yet. New finds are added here every morning.</div>'; return; }
+  if (!r.length) { list.innerHTML = '<div class="empty">Nothing matches this filter.</div>'; return; }
+  list.innerHTML = r.map(x => {
+    const fresh = x.found === today || x.found === yday;
+    const title = x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>` : esc(x.title);
+    const st = x.status && x.status !== 'new' ? `<span class="tag st-${esc(x.status)}">${esc(x.status)}</span>` : '';
+    const btn = (v,l) => `<button class="act${x.status===v?' on':''}" data-id="${esc(x.id)}" data-v="${v}">${l}</button>`;
+    const note = [x.note, x.old_note ? 'Earlier note: ' + x.old_note : ''].filter(Boolean).join(' ');
+    return `<article class="row${x.status==='pass'||x.status==='sold'?' dim':''}">
+      <div class="main">
+        <div class="tags">${fresh?'<span class="tag new">'+(x.found===today?'New today':'New yesterday')+'</span>':''}<span class="tag ${esc(x.rating)}">${x.rating==='top'?'Top pick':esc(x.rating||'')}</span><span class="tag kind">${esc(x.kind)}</span>${st}</div>
+        <h2 class="title">${title}</h2>
+        <div class="meta">${esc(x.location)}${x.miles!=null?' · ~'+x.miles+' mi':''} · ${esc(x.seller)} · ${esc(x.source)} · found ${esc(x.found)}</div>
+        ${note?`<div class="note">${esc(note)}</div>`:''}
+      </div>
+      <div class="side">
+        <div><div class="price">${money(x.price)}</div>${x.was?`<div class="was">${money(x.was)}</div>`:''}</div>
+        <div class="acts">${btn('interested','Interested')}${btn('pass','Pass')}${btn('sold','Sold')}</div>
+      </div>
+    </article>`;
+  }).join('');
 }
 
-function csv(){
-  const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
-  const hdr=["My stars","Passed","Deal score","Pick","Type","Model","Title","Price","Usual price","Fits Jeep","Jeep note","Length ft","Empty lb","Tongue lb","Max lb","Bath","Miles away","Seller","Location","Source","First seen","Link"];
-  const lines=[hdr.map(q).join(",")];
-  for(const r of visible()){ const rt=rOf(r); lines.push([rt.stars||"",rt.pass?"yes":"",Math.round(r.score),r.rating,r.kind,r.family,r.title,r.price,r.typical,FIT_LABEL[r.fit],r.fit_why,r.length,r.dry,r.tongue,r.gvwr,r.bath,r.miles,r.seller,r.location,r.source,r.first,r.url].map(q).join(",")); }
-  return lines.join("\n");
-}
-
-document.getElementById("dl").onclick = () => {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([csv()], {type:"text/csv"}));
-  a.download = "rv-scout.csv"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-};
-
-// When the Mac last published ads. It runs every morning, so over ~30 hours means a run was missed.
-function showFreshness(data){
-  const box = document.getElementById("fresh");
-  const t = data.updated ? new Date(data.updated) : data.asof ? new Date(data.asof+"T06:00") : null;
-  if(!t || isNaN(t)){ box.hidden = true; return; }
-  const hrs = (Date.now() - t) / 36e5;
-  const when = t.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"}) + (data.updated ? ", " + t.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}) : "");
-  const ago = hrs < 1 ? "under an hour ago" : hrs < 48 ? Math.round(hrs) + (Math.round(hrs)===1 ? " hour ago" : " hours ago") : Math.round(hrs/24) + " days ago";
-  const stale = hrs > 30;
-  box.className = "fresh" + (stale ? " stale" : "");
-  box.textContent = (stale ? "⚠ Not updated since " : "Updated ") + when + " (" + ago + ")" + (stale ? ". The Mac may be asleep or off; it catches up when it wakes." : "");
-}
-
-(async()=>{
-  const get = async (u, fallback) => { try{ const r = await fetch(u, {cache:"no-cache"}); return r.ok ? await r.json() : fallback; }catch(e){ return fallback; } };
-  const data = await get("data.json", {rows:[]});
-  ROWS = data.rows || []; ASOF = data.asof ? new Date(data.asof+"T12:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) : "—";
-  document.getElementById("asof").textContent = ASOF;
-  showFreshness(data);
-  // A source that came back empty (Safari logged out of Facebook, a site change) is named here.
-  if((data.warnings||[]).length){ const w=document.getElementById("warn"); w.hidden=false; w.textContent="⚠ "+data.warnings.join(" "); }
-  // Links ending in #<ad id> open that ad with every filter cleared so it's visible.
-  const hid = decodeURIComponent(location.hash.slice(1));
-  if(hid && ROWS.some(r => r.id===hid)) Object.assign(state, {fit:"Everything", pick:"Any", kind:"All", model:"All", dist:"Any", price:"Any", seller:"Any", src:"All", show:"Everything", open:hid});
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+  filter = c.dataset.f;
+  document.querySelectorAll('.chip').forEach(o => o.setAttribute('aria-pressed', o===c));
   render();
-  if(state.open){ const row = document.getElementById("row-"+state.open); if(row) row.scrollIntoView({block:"center"}); }
-  try{
-    const res = await fetch(API, {credentials:"same-origin", cache:"no-store"});
-    if(!res.ok) throw new Error((await res.json().catch(()=>({}))).error || res.status);
-    ratings = await res.json(); render(); setSync("Ranks sync through schaeferwerks.com");
-  }catch(e){ setSync("Ranks unavailable: " + e.message); }
+}));
+$('#sort').addEventListener('change', () => { saveUi(); render(); });
+$('#hide').addEventListener('change', () => { saveUi(); render(); });
+$('#big').addEventListener('change', () => { saveUi(); render(); });
+$('#list').addEventListener('click', async e => {
+  const b = e.target.closest('.act'); if (!b) return;
+  const x = rows.find(r => r.id === b.dataset.id); if (!x) return;
+  const v = x.status === b.dataset.v ? 'new' : b.dataset.v;
+  const body = {id: x.id, stars: v==='interested' ? 5 : v==='sold' ? 1 : 0, pass: v==='pass' || v==='sold'};
+  const prev = x.status; x.status = v; render();
+  try {
+    const res = await fetch(API, {method:'POST', headers:{'content-type':'application/json'}, credentials:'same-origin', body: JSON.stringify(body)});
+    if (!res.ok) throw new Error((await res.json().catch(()=>({}))).error || res.status);
+    ratings = await res.json();
+  } catch(err) { x.status = prev; render(); alert("Couldn't save that: " + err.message); }
+});
+
+const fmt = d => d.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+function tick(){ $('#now').textContent = 'Now: ' + fmt(new Date()); }
+tick(); setInterval(tick, 30000);
+function showUpd(){
+  const t = data.updated ? new Date(data.updated) : null;
+  const added = rows.filter(x => x.found === data.asof).length;
+  $('#upd').textContent = t && !isNaN(t) ? 'Last updated: ' + fmt(t) + ' · ' + added + ' new ads' : 'Last updated: unknown';
+  if ((data.warnings||[]).length) { $('#warn').hidden = false; $('#warn').textContent = '⚠ ' + data.warnings.join(' '); }
+}
+render();
+(async () => {
+  try { const r = await fetch('data.json', {cache:'no-cache'}); data = r.ok ? await r.json() : {}; } catch(e) { data = {}; }
+  try { const r = await fetch(API, {credentials:'same-origin', cache:'no-store'}); if (r.ok) ratings = await r.json(); } catch(e) {}
+  rows = (data.rows || []).map(x => Object.assign(x, {found: x.first, was: x.dropFrom, status: statusOf(x)}));
+  // Links ending in #<ad id> open with every filter cleared and that ad first.
+  const hid = decodeURIComponent(location.hash.slice(1));
+  if (hid && rows.some(x => x.id === hid)) { $('#hide').checked = false; $('#big').checked = true; const x = rows.find(x => x.id === hid); x.found = '9999'; }
+  render(); showUpd();
 })();
 </script>
 
