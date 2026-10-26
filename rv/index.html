@@ -71,7 +71,7 @@ select{font:600 15px var(--body);padding:8px 10px;border-radius:8px;border:1px s
   <header class="sign">
     <span class="specs">Portland, OR · Jeep tow limit 7,200 lb · under 25 ft · bathroom</span>
     <h1>RV Deal Tracker</h1>
-    <p>Every ad the daily search finds on Facebook, Craigslist, RV Trader and Airstream Marketplace, with links. New ones are added each morning. Tap Interested, Pass or Sold to sort them.</p>
+    <p>Every ad I find, with links. I add new ones each morning. Tap Interested, Pass or Sold to sort them.</p>
     <p class="stamp"><span id="now"></span><span id="upd">Last updated: loading…</span></p>
     <p class="stamp" id="warn" hidden></p>
   </header>
@@ -96,7 +96,6 @@ select{font:600 15px var(--body);padding:8px 10px;border-radius:8px;border:1px s
       </select>
     </label>
     <label for="hide"><input type="checkbox" id="hide" checked> Hide passed &amp; sold</label>
-    <label for="big"><input type="checkbox" id="big"> Show ones too big for the Jeep or with no bathroom</label>
     <span class="count" id="count"></span>
   </div>
 
@@ -113,8 +112,8 @@ const $ = s => document.querySelector(s);
 const API = '/rv/api/ratings';
 let rows = [], filter = 'all', ratings = {}, data = {};
 const RANK = {top:0, good:1, maybe:2};
-try { const s = JSON.parse(localStorage.getItem('rvt-ui2')||'{}'); if (s.sort) $('#sort').value = s.sort; if (s.hide===false) $('#hide').checked = false; if (s.big) $('#big').checked = true; } catch(e){}
-function saveUi(){ try{ localStorage.setItem('rvt-ui2', JSON.stringify({sort:$('#sort').value, hide:$('#hide').checked, big:$('#big').checked})); }catch(e){} }
+try { const s = JSON.parse(localStorage.getItem('rvt-ui2')||'{}'); if (s.sort) $('#sort').value = s.sort; if (s.hide===false) $('#hide').checked = false; } catch(e){}
+function saveUi(){ try{ localStorage.setItem('rvt-ui2', JSON.stringify({sort:$('#sort').value, hide:$('#hide').checked})); }catch(e){} }
 const money = n => n ? '$' + Number(n).toLocaleString('en-US') : 'Call';
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const loc = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -126,7 +125,7 @@ function statusOf(x){ const m = mark(x); return m.pass ? (m.stars===1 ? 'sold' :
 
 function render(){
   let r = rows.slice();
-  if (!$('#big').checked) r = r.filter(x => x.fit !== 'no' && x.bath !== 'no');
+  r = r.filter(x => x.fit !== 'no' && x.bath !== 'no');  // the Jeep can't tow it, or no bathroom
   if (filter === 'interested') r = r.filter(x => x.status === 'interested');
   else if (filter.startsWith('t:')) { const re = new RegExp(filter.slice(2), 'i'); r = r.filter(x => re.test(x.title || '')); }
   else if (filter !== 'all') r = r.filter(x => x.kind === filter);
@@ -135,7 +134,7 @@ function render(){
   const P = x => x.price || 1e9, D = x => x.miles ?? 1e9;
   const N = x => s === 'pick' && x.found === today ? 0 : 1;
   r.sort((a,b) => N(a)-N(b) || (s==='price' ? P(a)-P(b) : s==='dist' ? D(a)-D(b) : s==='found' ? (String(b.found).localeCompare(String(a.found)) || (RANK[a.rating]??3)-(RANK[b.rating]??3) || b.score-a.score) : (RANK[a.rating]??3)-(RANK[b.rating]??3) || b.score-a.score));
-  $('#count').textContent = r.length + ' of ' + rows.length + ' ads';
+  $('#count').textContent = r.length + ' of ' + rows.filter(x => x.fit !== 'no' && x.bath !== 'no').length + ' ads';
   const list = $('#list');
   if (!rows.length) { list.innerHTML = '<div class="empty">No listings yet. New finds are added here every morning.</div>'; return; }
   if (!r.length) { list.innerHTML = '<div class="empty">Nothing matches this filter.</div>'; return; }
@@ -167,7 +166,6 @@ document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () =
 }));
 $('#sort').addEventListener('change', () => { saveUi(); render(); });
 $('#hide').addEventListener('change', () => { saveUi(); render(); });
-$('#big').addEventListener('change', () => { saveUi(); render(); });
 $('#list').addEventListener('click', async e => {
   const b = e.target.closest('.act'); if (!b) return;
   const x = rows.find(r => r.id === b.dataset.id); if (!x) return;
@@ -197,7 +195,7 @@ render();
   rows = (data.rows || []).map(x => Object.assign(x, {found: x.first, was: x.dropFrom, status: statusOf(x)}));
   // Links ending in #<ad id> open with every filter cleared and that ad first.
   const hid = decodeURIComponent(location.hash.slice(1));
-  if (hid && rows.some(x => x.id === hid)) { $('#hide').checked = false; $('#big').checked = true; const x = rows.find(x => x.id === hid); x.found = '9999'; }
+  if (hid && rows.some(x => x.id === hid)) { $('#hide').checked = false; const x = rows.find(x => x.id === hid); x.found = '9999'; }
   render(); showUpd();
 })();
 </script>
