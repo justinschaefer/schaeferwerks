@@ -3,6 +3,12 @@
 // Cf-Access-Authenticated-User-Email header) or by the page itself (the browser marks those same-origin).
 // Neither page is behind Access yet, so anyone who finds a page can see it.
 
+// RV Scout's listings. The MacBook Pro that runs the daily search has no GitHub login, so instead of
+// pushing rv/data.json it uploads it here (POST /rv/api/data with its key), and /rv/data.json is served
+// from KV. Only the SHA-256 of the upload key is here; the key itself is in ~/RVScout/upload.key on that Mac.
+const RV_DATA_KEY = "rv-data";
+const RV_UPLOAD_KEY_SHA256 = "cdc801a32ca7d81858f5341927d545fe06a9b8460a45c2544d9bb0df6c328632";
+
 // Each page keeps its ranks under its own key in the COAST KV namespace.
 const APPS = {
   coast: { key: "ratings", seed: "/coast/seed-ratings.json", id: /^\d{1,12}$/, page: "/coast" },
@@ -14,6 +20,11 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/coast/api/ratings") return ratings(request, env, url, APPS.coast);
     if (url.pathname === "/rv/api/ratings") return ratings(request, env, url, APPS.rv);
+    if (url.pathname === "/rv/api/data") return uploadRvData(request, env);
+    if (url.pathname === "/rv/data.json") {
+      const data = await env.COAST.get(RV_DATA_KEY);
+      if (data) return new Response(data, { headers: { "content-type": "application/json", "cache-control": "no-cache" } });
+    }
     return env.ASSETS.fetch(request);
   },
 };
@@ -60,4 +71,22 @@ async function ratings(request, env, url, app) {
   else all[id] = { stars, pass, t: new Date().toISOString() };
   await env.COAST.put(app.key, JSON.stringify(all));
   return json(all);
+}
+
+async function sha256Hex(text) {
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// POST the whole rv/data.json with header X-RVScout-Key: the daily search on the MacBook Pro does this.
+async function uploadRvData(request, env) {
+  if (request.method !== "POST") return json({ error: "Use POST." }, 405);
+  const key = request.headers.get("x-rvscout-key") || "";
+  if (!key || (await sha256Hex(key)) !== RV_UPLOAD_KEY_SHA256) return json({ error: "Wrong upload key." }, 403);
+  const text = await request.text();
+  let data;
+  try { data = JSON.parse(text); } catch { return json({ error: "Bad JSON." }, 400); }
+  if (!Array.isArray(data.rows) || !data.updated) return json({ error: "Expected {updated, rows: [...]}." }, 400);
+  await env.COAST.put(RV_DATA_KEY, text);
+  return json({ ok: true, rows: data.rows.length, updated: data.updated });
 }

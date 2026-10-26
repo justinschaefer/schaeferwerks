@@ -2,10 +2,12 @@
 
 schaeferwerks.com/rv lists used trailers for sale that the Jeep can tow. This file is not published (see `.assetsignore`).
 
-- `rv/data.json` is rewritten every morning at 6:37 by the job on Justin's Mac (`~/RVScout/run.sh`, scheduled by
-  `~/Library/LaunchAgents/com.schaeferwerks.rvscout.plist`); no Claude is involved. It uses the fetch tools from the
+- The listings are refreshed every morning at 6:37 by the job on Justin's MacBook Pro (`~/RVScout/run.sh`, scheduled by
+  `~/Library/LaunchAgents/com.schaeferwerks.rvscout.plist`); no Claude is involved. That Mac has no GitHub login, so it
+  uploads the listings to the worker (`POST /rv/api/data` with the key in `~/RVScout/upload.key`), which keeps them in
+  KV (`rv-data`) and serves them as `/rv/data.json`. There is no `rv/data.json` file in the repo. It uses the fetch tools from the
   old Claude-run search (`~/rv-search`): Craigslist and Airstream Marketplace with plain `curl`, and Facebook Marketplace
-  and RV Trader through Safari (logged in to Facebook) in a Safari window of its own. Don't edit `data.json` by hand.
+  and RV Trader through Safari (logged in to Facebook) in a Safari window of its own. 
 - The rules (tow limits, target models, model specs, what counts as a toy hauler, deal ratings) are in
   `~/RVScout/rvscout.py`. Add a model to `MODELS` there. The log is `~/RVScout/logs/run.log`.
 - Stars and passes are saved by `worker.js` (`/rv/api/ratings`) in the `COAST` KV namespace under the key `rv-ratings`.
