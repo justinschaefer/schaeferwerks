@@ -5,13 +5,15 @@
   "assets": {
     "directory": "./",
     "binding": "ASSETS",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    // The worker checks for Cloudflare Access sign-in before serving anything under /rv.
+    "run_worker_first": ["/rv", "/rv/*"]
   },
-  // Coast Land Scout star ranks and passes. Wrangler creates the namespace on first deploy.
+  // Star ranks and passes for Coast Land Scout and RV Scout (keys "ratings" and "rv-ratings"). Wrangler creates the namespace on first deploy.
   "kv_namespaces": [
     { "binding": "COAST" }
   ],
-  // Cloudflare Access only guards schaeferwerks.com, so keep the private /coast page off the other URLs.
+  // Cloudflare Access only guards schaeferwerks.com, so keep the private /coast and /rv pages off the other URLs.
   "workers_dev": false,
   "preview_urls": false
 }
