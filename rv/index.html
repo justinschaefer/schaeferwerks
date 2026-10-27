@@ -88,10 +88,10 @@ select{font:600 15px var(--body);padding:8px 10px;border-radius:8px;border:1px s
     <button class="chip" id="f-wb" data-f="built" aria-pressed="false">Well built</button>
     <button class="chip" id="f-th" data-f="Toy hauler" aria-pressed="false">Toy haulers</button>
     <button class="chip" id="f-as" data-f="Airstream" aria-pressed="false">Airstreams</button>
-    <button class="chip" id="f-wp" data-f="t:wolf pup" aria-pressed="false">Wolf Pups</button>
-    <button class="chip" id="f-rp" data-f="t:r-pod" aria-pressed="false">R-Pods</button>
-    <button class="chip" id="f-ep" data-f="t:e-pro|19fbth|e19" aria-pressed="false">E-Pros</button>
-    <button class="chip" id="f-tt" data-f="Travel trailer" aria-pressed="false">Other trailers</button>
+    <button class="chip" id="f-wp" data-f="t:wolf\s?pup" aria-pressed="false">Wolf Pups</button>
+    <button class="chip" id="f-rp" data-f="t:\br-?\s?pod" aria-pressed="false">R-Pods</button>
+    <button class="chip" id="f-ep" data-f="t:\be-?\s?pro\b|19fbth|\be19" aria-pressed="false">E-Pros</button>
+    <button class="chip" id="f-tt" data-f="other" aria-pressed="false">Other trailers</button>
     <button class="chip" id="f-int" data-f="interested" aria-pressed="false">My interested</button>
   </div>
   <div class="bar">
@@ -136,6 +136,10 @@ function render(){
   r = r.filter(x => x.fit !== 'no' && x.bath !== 'no');  // the Jeep can't tow it, or no bathroom
   if (filter === 'interested') r = r.filter(x => x.status === 'interested');
   else if (filter === 'built') r = r.filter(x => x.built);
+  else if (filter === 'other') {  // travel trailers that don't have their own button (R-Pods, Wolf Pups, E-Pros...)
+    const own = [...document.querySelectorAll('.chip[data-f^="t:"]')].map(c => new RegExp(c.dataset.f.slice(2), 'i'));
+    r = r.filter(x => x.kind === 'Travel trailer' && !own.some(re => re.test(x.title || '')));
+  }
   else if (filter.startsWith('t:')) { const re = new RegExp(filter.slice(2), 'i'); r = r.filter(x => re.test(x.title || '')); }
   else if (filter !== 'all') r = r.filter(x => x.kind === filter);
   if ($('#hide').checked) r = r.filter(x => x.status !== 'pass' && x.status !== 'sold');
