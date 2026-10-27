@@ -14,11 +14,15 @@ schaeferwerks.com/rv lists used trailers for sale that the Jeep can tow. This fi
   with its key) and starts the daily job; its upload marks the search finished. No new request within 15 minutes of one.
 - The rules (tow limits, target models, model specs, what counts as a toy hauler, deal ratings) are in
   `~/RVScout/rvscout.py`. Add a model to `MODELS` there. The log is `~/RVScout/logs/run.log`.
-- "Well built" brands (`WELL_BUILT` in rvscout.py): Rockwood (Geo Pro, Mini Lite, Roo) and Flagstaff (E-Pro, Micro Lite,
-  Shamrock) and Lance travel trailers any year, Surveyor and No Boundaries 2017-2019. They're searched on every site, get a "Well built" tag
+- "Well built" brands (`WELL_BUILT` in rvscout.py): Rockwood (Geo Pro, Mini Lite) and Flagstaff (E-Pro, Micro Lite) and
+  Lance travel trailers any year, Surveyor and No Boundaries 2017-2019. They're searched on every site, get a "Well built" tag
   (row field `built`) and rank higher; the page has a Well built button.
+- Heartland and its lines (Sundance, Mallard, Prowler...) are never listed: `DROP_BRANDS` in rvscout.py. So is the Geo Pro / E-Pro 12RK (too small; `DROP_FAMILIES`), the Rockwood Roo / Flagstaff Shamrock, and every "Sun" brand (Sunray, Sun Lite, Rush, Sunset Trail...).
+- Nothing older than 2016 is listed except Airstreams (`OLDEST_YEAR`); an ad with no year is kept. Nor is anything
+  under 15 ft (`MIN_LENGTH`, when the ad states the length) or with a tent (pop-ups, hybrids, teardrops: `TENT`).
 - The top model is the Rockwood Geo Pro G19FBTH (and its twin, the Flagstaff E-Pro E19FBTH): `TOP_MODEL` in rvscout.py.
-  It's searched nationwide; one that fits, is within budget and within 600 miles is always a top pick.
+  Its siblings, the Rockwood 19FS and the Geo Pro / E-Pro 19TH toy haulers, are targets too (the page's
+  Geo Pro toy haulers button shows all three). It's searched nationwide; one that fits, is within budget and within 600 miles is always a top pick.
 - Stars and passes are saved by `worker.js` (`/rv/api/ratings`) in the `COAST` KV namespace under the key `rv-ratings`.
   The first load starts from `rv/seed-ratings.json`, which holds the passes from the old RV Deal Tracker on claude.ai.
   Those use the tracker's ids; the daily job lists them in a row's `aliases` when its link matches, and does the same
