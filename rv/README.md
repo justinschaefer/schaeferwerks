@@ -3,13 +3,22 @@
 schaeferwerks.com/rv lists used trailers for sale that the Jeep can tow. This file is not published (see `.assetsignore`).
 
 - The listings are refreshed every morning at 6:37 by the job on Justin's MacBook Pro (`~/RVScout/run.sh`, scheduled by
-  `~/Library/LaunchAgents/com.schaeferwerks.rvscout.plist`); no Claude is involved. That Mac has no GitHub login, so it
+  `~/Library/LaunchAgents/com.schaeferwerks.rvscout.plist`); no Claude is involved. It
   uploads the listings to the worker (`POST /rv/api/data` with the key in `~/RVScout/upload.key`), which keeps them in
-  KV (`rv-data`) and serves them as `/rv/data.json`. There is no `rv/data.json` file in the repo. It uses the fetch tools from the
+  KV (`rv-data`) and serves them as `/rv/data.json`. There is no `rv/data.json` file in the repo. A newer `/rv` page
+  can be uploaded the same way (`POST /rv/api/page`, kept in KV as `rv-page`); it replaces `rv/index.html` until removed. It uses the fetch tools from the
   old Claude-run search (`~/rv-search`): Craigslist and Airstream Marketplace with plain `curl`, and Facebook Marketplace
   and RV Trader through Safari (logged in to Facebook) in a Safari window of its own. 
+- "Search now" on the page asks for a search (`POST /rv/api/search`, state in KV `rv-search`). The MacBook Pro checks
+  every 2 minutes (`~/RVScout/searchnow.sh`, LaunchAgent `com.schaeferwerks.rvscout-searchnow`, `POST /rv/api/search/claim`
+  with its key) and starts the daily job; its upload marks the search finished. No new request within 15 minutes of one.
 - The rules (tow limits, target models, model specs, what counts as a toy hauler, deal ratings) are in
   `~/RVScout/rvscout.py`. Add a model to `MODELS` there. The log is `~/RVScout/logs/run.log`.
+- "Well built" brands (`WELL_BUILT` in rvscout.py): Rockwood (Geo Pro, Mini Lite, Roo) and Flagstaff (E-Pro, Micro Lite,
+  Shamrock) and Lance travel trailers any year, Surveyor and No Boundaries 2017-2019. They're searched on every site, get a "Well built" tag
+  (row field `built`) and rank higher; the page has a Well built button.
+- The top model is the Rockwood Geo Pro G19FBTH (and its twin, the Flagstaff E-Pro E19FBTH): `TOP_MODEL` in rvscout.py.
+  It's searched nationwide; one that fits, is within budget and within 600 miles is always a top pick.
 - Stars and passes are saved by `worker.js` (`/rv/api/ratings`) in the `COAST` KV namespace under the key `rv-ratings`.
   The first load starts from `rv/seed-ratings.json`, which holds the passes from the old RV Deal Tracker on claude.ai.
   Those use the tracker's ids; the daily job lists them in a row's `aliases` when its link matches, and does the same

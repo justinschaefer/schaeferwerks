@@ -31,6 +31,10 @@ header.sign{background:var(--accent);color:var(--accent-ink);border-radius:10px;
 header.sign h1{font:800 clamp(24px,5vw,34px)/1.05 var(--display);margin:0;letter-spacing:.01em;text-wrap:balance}
 header.sign p{margin:0;font-size:15px;opacity:.92}
 .stamp{display:flex;flex-wrap:wrap;gap:4px 18px;font:600 14px var(--body)!important;opacity:1!important}
+.searchnow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:6px!important;font:600 14px var(--body)!important;opacity:1!important}
+.srch{font:800 14px var(--body);background:var(--accent-ink);color:var(--accent);border:0;border-radius:8px;padding:7px 14px;min-height:36px;cursor:pointer}
+.srch[disabled]{opacity:.65;cursor:default}
+.srch:focus-visible{outline:3px solid var(--top);outline-offset:2px}
 .specs{font:500 12px var(--mono);letter-spacing:.04em;text-transform:uppercase;opacity:.9}
 .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .chip{font:600 15px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;min-height:40px}
@@ -49,6 +53,7 @@ select{font:600 15px var(--body);padding:8px 10px;border-radius:8px;border:1px s
 .tag.st-interested{background:var(--good);color:var(--surface);border-color:var(--good)}
 .tag.st-sold,.tag.st-pass{color:var(--warn)}
 .tag.new{background:var(--top);color:var(--surface);border-color:var(--top)}
+.tag.built{color:var(--fg)}
 .title{font:800 19px/1.2 var(--display);margin:0;text-wrap:balance}
 .title a{color:var(--fg);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 .title a:hover{text-decoration-color:var(--accent)}
@@ -74,10 +79,13 @@ select{font:600 15px var(--body);padding:8px 10px;border-radius:8px;border:1px s
     <p>Every ad I find, with links. I add new ones each morning. Tap Interested, Pass or Sold to sort them.</p>
     <p class="stamp"><span id="now"></span><span id="upd">Last updated: loading…</span></p>
     <p class="stamp" id="warn" hidden></p>
+    <p class="searchnow"><button class="srch" id="srch" type="button">Search now</button><span id="srchmsg" role="status"></span></p>
   </header>
 
   <div class="bar" role="group" aria-label="Filter by type">
     <button class="chip" id="f-all" data-f="all" aria-pressed="true">All</button>
+    <button class="chip" id="f-top" data-f="t:19\s?fbth" aria-pressed="false">Geo Pro 19FBTH</button>
+    <button class="chip" id="f-wb" data-f="built" aria-pressed="false">Well built</button>
     <button class="chip" id="f-th" data-f="Toy hauler" aria-pressed="false">Toy haulers</button>
     <button class="chip" id="f-as" data-f="Airstream" aria-pressed="false">Airstreams</button>
     <button class="chip" id="f-wp" data-f="t:wolf pup" aria-pressed="false">Wolf Pups</button>
@@ -127,6 +135,7 @@ function render(){
   let r = rows.slice();
   r = r.filter(x => x.fit !== 'no' && x.bath !== 'no');  // the Jeep can't tow it, or no bathroom
   if (filter === 'interested') r = r.filter(x => x.status === 'interested');
+  else if (filter === 'built') r = r.filter(x => x.built);
   else if (filter.startsWith('t:')) { const re = new RegExp(filter.slice(2), 'i'); r = r.filter(x => re.test(x.title || '')); }
   else if (filter !== 'all') r = r.filter(x => x.kind === filter);
   if ($('#hide').checked) r = r.filter(x => x.status !== 'pass' && x.status !== 'sold');
@@ -146,7 +155,7 @@ function render(){
     const note = [x.note, x.old_note ? 'Earlier note: ' + x.old_note : ''].filter(Boolean).join(' ');
     return `<article class="row${x.status==='pass'||x.status==='sold'?' dim':''}">
       <div class="main">
-        <div class="tags">${fresh?'<span class="tag new">'+(x.found===today?'New today':'New yesterday')+'</span>':''}<span class="tag ${esc(x.rating)}">${x.rating==='top'?'Top pick':esc(x.rating||'')}</span><span class="tag kind">${esc(x.kind)}</span>${st}</div>
+        <div class="tags">${fresh?'<span class="tag new">'+(x.found===today?'New today':'New yesterday')+'</span>':''}<span class="tag ${esc(x.rating)}">${x.rating==='top'?'Top pick':esc(x.rating||'')}</span><span class="tag kind">${esc(x.kind)}</span>${x.family==='Geo Pro / E-Pro 19FBTH'?'<span class="tag new">Top model</span>':''}${x.built?'<span class="tag built">Well built · '+esc(x.built)+'</span>':''}${st}</div>
         <h2 class="title">${title}</h2>
         <div class="meta">${esc(x.location)}${x.miles!=null?' · ~'+x.miles+' mi':''} · ${esc(x.seller)} · ${esc(x.source)} · found ${esc(x.found)}</div>
         ${note?`<div class="note">${esc(note)}</div>`:''}
@@ -189,14 +198,53 @@ function showUpd(){
   if ((data.warnings||[]).length) { $('#warn').hidden = false; $('#warn').textContent = '⚠ ' + data.warnings.join(' '); }
 }
 render();
-(async () => {
+// "Search now": asks the MacBook Pro (which checks every 2 minutes) to run the search; the ads reload when it's done.
+const SAPI = '/rv/api/search';
+let srchTimer = null, loadedAt = 0;
+const hm = t => t ? new Date(t).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'}) : '';
+function showSearch(st){
+  const b = $('#srch'), m = $('#srchmsg');
+  if (st.status === 'requested') {
+    b.disabled = true;
+    m.textContent = (Date.now() - Date.parse(st.requested)) / 60000 > 6
+      ? 'Waiting for the MacBook Pro since ' + hm(st.requested) + '; it may be asleep or off. The search starts when it wakes.'
+      : 'Search requested at ' + hm(st.requested) + '. The MacBook Pro starts it within 2 minutes.';
+  } else if (st.status === 'searching') {
+    b.disabled = true; m.textContent = 'Searching since ' + hm(st.started) + '. New ads show up here in about 10 minutes.';
+  } else {
+    b.disabled = false; m.textContent = st.error || '';
+  }
+  clearTimeout(srchTimer);
+  if (st.status !== 'idle') srchTimer = setTimeout(pollSearch, 20000);
+}
+async function pollSearch(){
+  try {
+    const st = await (await fetch(SAPI, {credentials:'same-origin', cache:'no-store'})).json();
+    if (st.status === 'idle' && st.finished && Date.parse(st.finished) > loadedAt) { await load(); st.error = 'Search finished at ' + hm(st.finished) + '.'; }
+    showSearch(st);
+  } catch(e) { srchTimer = setTimeout(pollSearch, 60000); }
+}
+$('#srch').addEventListener('click', async () => {
+  $('#srch').disabled = true;
+  try {
+    const st = await (await fetch(SAPI, {method:'POST', credentials:'same-origin'})).json();
+    showSearch(st);
+  } catch(e) { $('#srch').disabled = false; $('#srchmsg').textContent = "Couldn't ask for a search: " + e.message; }
+});
+
+async function load(){
   try { const r = await fetch('data.json', {cache:'no-cache'}); data = r.ok ? await r.json() : {}; } catch(e) { data = {}; }
   try { const r = await fetch(API, {credentials:'same-origin', cache:'no-store'}); if (r.ok) ratings = await r.json(); } catch(e) {}
+  loadedAt = Date.now();
   rows = (data.rows || []).map(x => Object.assign(x, {found: x.first, was: x.dropFrom, status: statusOf(x)}));
+  render(); showUpd();
+}
+(async () => {
+  await load();
   // Links ending in #<ad id> open with every filter cleared and that ad first.
   const hid = decodeURIComponent(location.hash.slice(1));
-  if (hid && rows.some(x => x.id === hid)) { $('#hide').checked = false; const x = rows.find(x => x.id === hid); x.found = '9999'; }
-  render(); showUpd();
+  if (hid && rows.some(x => x.id === hid)) { $('#hide').checked = false; const x = rows.find(x => x.id === hid); x.found = '9999'; render(); }
+  pollSearch();
 })();
 </script>
 
