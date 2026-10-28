@@ -106,3 +106,10 @@ Before committing:
 - Validate with `python3 -m json.tool coast/notes.json`.
 - Add the place to the "What has already been researched" table in `coast/RESEARCH.md`.
 - Never edit `data.json`. The daily job rewrites it.
+## 8. Notes from the MacBook Pro (2026-10-27)
+
+- Browser: `~/rv-search/fetch_pool.py` loads pages in Claude's own Safari window and saves the HTML (never touch the user's tabs). Zillow's `__NEXT_DATA__` comes through this way. In-page JavaScript (PDFs, search forms) needs Safari's "Allow JavaScript from Apple Events" setting.
+- Tsunami (OR) quick check: `https://gis.dogami.oregon.gov/arcgis/rest/services/Tsunami/XXL1_Flow_Depth_Ft/ImageServer/identify?geometry=LON,LAT&geometryType=esriGeometryPoint&sr=4326&f=json` (NoData = outside).
+- SLIDO layers: 11 = deposits, 2 = scarps, 1 = historic points (layer 4 no longer exists).
+- If sdmdataaccess is down, SoilWeb gives the map unit: `https://casoilresource.lawr.ucdavis.edu/api/landPKS.php?q=spn&lon=LON&lat=LAT&r=10`.
+- Tillamook County moved its site to CivicEngage in 2026; the old `/sites/default/files/...` LUO PDF links now 404. Don't cite them.
