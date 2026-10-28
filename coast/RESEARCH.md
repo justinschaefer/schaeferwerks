@@ -47,8 +47,8 @@ Notes for these are in `notes.json`. Reuse them; only re-check rules that may ha
 | Newport, OR | City of Newport, NMC Title XIV | area note + listing 200115486 |
 | Lincoln City, OR | City of Lincoln City | area note + listing 198986077 |
 | Toledo, OR (1916 NE Wagon Rd) | Lincoln County R-1 inside the Toledo UGB | listing 134333814 (no area note: Toledo rows mix city and county) |
-| Pacific City, OR (TL 200 Reddekopp Rd) | Tillamook County PCW-R2 (LUO 3.333, Article 5 RV siting) | listing 183463933 (no area note yet: the county moved its site and the old LUO PDF links are dead) |
-| Seal Rock, OR (9500 NW Lark St) | Lincoln County (zone not yet confirmed) | listing 134130041 |
+| Pacific City, OR (TL 200 Reddekopp Rd) | Tillamook County PCW-R2 (LUO 3.333, Article 5 RV siting) | listing 183463933 (no area note yet; assessor at query.co.tillamook.or.us/PSO, search Map as `4S1030AA 00200`) |
+| Seal Rock, OR (9500 NW Lark St) | Lincoln County T-C Timber Conservation (LCC 1.1375; code PDF at co.lincoln.or.us/DocumentCenter/View/647) | listing 134130041 |
 | Cannon Beach, OR | City of Cannon Beach | area note only (the lot researched isn't in data.json) |
 
 Researched but not in `notes.json` because the listing isn't in `data.json` (or couldn't be matched):

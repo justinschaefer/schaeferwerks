@@ -147,13 +147,17 @@
     "183463933": {
       "rv": "limited",
       "tags": [
+        "Asking 49% over county value",
         "Steep: 29% average slope",
         "Flat bench on north edge",
-        "Public water, septic needed",
-        "Asking $127K/acre"
+        "Public water, septic needed"
       ],
-      "note": "Unincorporated Tillamook County, Pacific City/Woods, zoned PCW-R2 (medium-density residential). Tax lot 4S1030AA00200, about 60,000 sq ft (1.38 acres). Listed $175,000, 123 days on market, last sold Feb 2023; owner lives in Valley Center, CA. Listing says public water, septic needed. County assessed value not checked (assessor site blocked automated reads).\n\nLiDAR (USGS 3DEP, 2009): not a level lot. Overall 29% slope falling SE (bearing 134) toward the river; local slope median 33%, 90th percentile 58%, max 72%. Elevation 51-135 ft. The only gentle ground is the top (north) edge at about 123-134 ft, roughly a 100 x 60 ft bench; everything below drops steeply. Building and drainfield would have to share that bench.\n\nHazards: FEMA Zone X. No mapped wetland on the lot; tidal Nestucca River (NWI riverine) about 160 ft away, small seasonal creeks about 130 ft away (county riparian setback along the Nestucca is 50 ft). DOGAMI SLIDO shows a prehistoric shallow earth-flow landslide nearby but not touching the lot. Outside the tsunami zone, even the largest (XXL) Cascadia scenario on DOGAMI's maps.\n\nSoil: Fendall-Munsoncreek complex (SSURGO map unit 121D, about 18% typical slope, capability class 6e: erosion-limited). The USDA septic rating couldn't be pulled (soil database was down); slope alone makes septic hard here.\n\nRules: PCW-R2 allows one- or two-family dwellings outright and lists temporary construction trailers or RVs as an outright use. County LUO 5.010 requires a placement permit before any RV goes on a lot; during construction the RV must be unhooked and stored or removed within 30 days after the building permit closes. Living in an RV on the vacant lot without a building permit was not found as allowed; a 2018 LUBA ruling read county code as limiting RVs to non-residential vacation use. The zone's stated purpose assumes public sewer, which this lot lacks.\n\nShort-term rentals: county STR license cap. West of the Nestucca (Alder St south to Bob Straub) is cap-free since Jan 2025; the rest of Pacific City/Woods is capped at 95 licenses. This lot sits inside a river bend, so which side it falls on isn't confirmed.\n\nVerdict: a view lot, not a camp spot. Make-or-break is fitting house plus septic on the small north bench of a 29% slope, near an old landslide. Suggested offer: open about $140K, aim $150-155K, contingent on a septic site evaluation and a geotechnical look at the slope.",
+      "note": "Unincorporated Tillamook County, Pacific City/Woods, zoned PCW-R2 (medium-density residential). Tax lot 4S1030AA00200, about 60,000 sq ft (1.38 acres). Listed $175,000, 123 days on market, last sold Feb 2023. Owner: Knecht Living Trust, Valley Center, CA. County real market value $117,470 (land only), so the ask is 49% over; taxes about $321/yr. Agent Shae Lambert, CENTURY 21 Shorepine. Listing says public water, septic needed.\n\nLiDAR (USGS 3DEP, 2009): not a level lot. Overall 29% slope falling SE (bearing 134) toward the river; local slope median 33%, 90th percentile 58%, max 72%. Elevation 51-135 ft. The only gentle ground is the top (north) edge at about 123-134 ft, roughly a 100 x 60 ft bench; everything below drops steeply. Building and drainfield would have to share that bench.\n\nHazards: FEMA Zone X. No mapped wetland on the lot; tidal Nestucca River (NWI riverine) about 160 ft away, small seasonal creeks about 130 ft away (county riparian setback along the Nestucca is 50 ft). DOGAMI SLIDO shows a prehistoric shallow earth-flow landslide nearby but not touching the lot. Outside the tsunami zone, even the largest (XXL) Cascadia scenario on DOGAMI's maps.\n\nSoil: Fendall-Munsoncreek complex (SSURGO map unit 121D, about 18% typical slope, capability class 6e: erosion-limited). The USDA septic rating couldn't be pulled (soil database was down); slope alone makes septic hard here.\n\nRules: PCW-R2 allows one- or two-family dwellings outright and lists temporary construction trailers or RVs as an outright use. County LUO 5.010 requires a placement permit before any RV goes on a lot; during construction the RV must be unhooked and stored or removed within 30 days after the building permit closes. Living in an RV on the vacant lot without a building permit was not found as allowed; a 2018 LUBA ruling read county code as limiting RVs to non-residential vacation use. The zone's stated purpose assumes public sewer, which this lot lacks.\n\nShort-term rentals: county STR license cap. West of the Nestucca (Alder St south to Bob Straub) is cap-free since Jan 2025; the rest of Pacific City/Woods is capped at 95 licenses. This lot sits inside a river bend, so which side it falls on isn't confirmed.\n\nVerdict: a view lot, not a camp spot. Make-or-break is fitting house plus septic on the small north bench of a 29% slope, near an old landslide. Suggested offer: open about $125K, aim $135-145K (county value $117K, 4 months on market), contingent on a septic site evaluation and a geotechnical look at the slope.",
       "sources": [
+        {
+          "title": "Tillamook County property record (account 235196)",
+          "url": "https://query.co.tillamook.or.us/PSO/detail/235196/R"
+        },
         {
           "title": "LUBA: Oregon Coast Reliance v. Tillamook County (2018)",
           "url": "https://wlo.willamette.edu/orluba/2018/02/oregon-coast-reliance-v.-tillamook-county.html"
@@ -171,27 +175,32 @@
     },
     "134130041": {
       "tags": [
+        "Zoned T-C forest: no RV living",
+        "Asking under county value ($326K)",
         "Septic (4-bed, 2002) + public water in",
-        "Mostly flat pasture",
-        "Seasonal creek ravine mid-lot",
-        "Outside tsunami zone"
+        "Keep the old home: replacement right"
       ],
-      "note": "Unincorporated Lincoln County near Seal Rock. Tax lot 12-11-30-CC-00301-00, 3.5 acres; owner in Toledo, OR. Listed $260,000, 178 days on market; Zestimate $243,200. Agent Matt Moore, Elkhorn Real Estate. Already has public water, power and a 4-bedroom septic installed in 2002; phone and cable available. The old manufactured home on it has no value per the listing (removal cost is on the buyer). Zoning and county assessed value not confirmed (Lincoln County's property and map sites need in-page searches).\n\nLiDAR (USGS 3DEP, 2009): overall 5% falling north, but not uniform. The east half is a flat pasture at about 111-118 ft; the west end is a treed rise up to about 125 ft. A seasonal creek ravine runs north-south through the middle, 25-35 ft deep (down to about 77 ft), with sides up to 40-56% slope. Local slope median 15%. Plenty of flat building ground on the east side.\n\nHazards: FEMA Zone X. Outside the tsunami zone, even the largest (XXL) Cascadia scenario on DOGAMI's maps. No NWI wetland on the lot (nearest riverine wetland about 600 ft); the unnamed seasonal creek is mapped in NHD and likely brings a riparian setback along the ravine. DOGAMI SLIDO shows a historic (under 150 years) shallow slide nearby, not on the lot. Soil: Nelscott (SSURGO map unit 64692); USDA septic rating not pulled (soil database down), but the existing approved 4-bedroom system makes that less critical.\n\nRV and rules: Lincoln County RV and camping rules for this zone not yet confirmed. On the Toledo lot (Lincoln County R-1), RVs were allowed only during construction (1 year).\n\nVerdict: one of the more usable lots so far: flat, utilities and septic already in, half a mile from the ocean. Make-or-break: confirm zoning and RV rules, have the 2002 septic inspected, and price in removing the manufactured home. Suggested offer: open about $225K, aim $235-245K, contingent on septic inspection.",
+      "note": "Unincorporated Lincoln County near Seal Rock, zoned T-C (Timber Conservation, a forest zone), not residential. Tax lot 12-11-30-CC-00301-00, account R517770, 3.5 acres (parcel 2 of partition plat 2002-11). Owner Tammy Hoefs (Toledo, OR), who bought it for $65,000 in Dec 2002. Listed $260,000, 178 days on market; agent Matt Moore, Elkhorn Real Estate. County real market value $326,080 (land $250,020, improvements $76,060); the ask is 20% under. Taxes about $2,000/yr. Public water, power and a 4-bedroom septic installed in 2002; the county still carries the manufactured home as a 3-bedroom dwelling ('untitled manufactured structure').\n\nLiDAR (USGS 3DEP, 2009): overall 5% falling north, but not uniform. The east half is a flat pasture at about 111-118 ft; the west end is a treed rise up to about 125 ft. A seasonal creek ravine runs north-south through the middle, 25-35 ft deep, with sides up to 40-56%. Plenty of flat building ground on the east side.\n\nHazards: FEMA Zone X. Outside the tsunami zone, even the largest (XXL) Cascadia scenario on DOGAMI's maps. No NWI wetland on the lot (nearest about 600 ft); the seasonal creek is mapped in NHD. DOGAMI SLIDO shows a historic (under 150 years) shallow slide nearby, not on the lot. Soil: Nelscott (SSURGO map unit 64692).\n\nZoning is the big catch. In T-C (LCC 1.1375) a new house is only possible through narrow forest-dwelling tests, and the minimum lot size is 80 acres (no partitioning). What makes this lot buildable is the existing home: replacing a lawfully established dwelling is allowed outright under 1.1375(1)(q) if it has intact walls and roof, indoor plumbing (kitchen sink, toilet, bathing) on the septic, wiring and heat; the old one must go within 90 days after the new one is done. The listing calls the home 'no value'. Do not remove it before a replacement permit, or the right to build may be lost. New dwellings must meet fire siting rules: Class A roof, 30 ft firebreak, slope 40% or less.\n\nRV: no RV living. T-C has no RV or camping use except a medical-hardship dwelling, and Lincoln County won a 2025 court case (upheld on appeal) treating RVs and yurts in T-C as illegal dwelling units. Private campgrounds are a conditional use. Forest practices (cutting trees) are allowed outright under the Oregon Forest Practices Act.\n\nVerdict: good land at a price under county value, but only as a replace-the-house deal, not an RV spot. Make-or-break: confirm the old home qualifies as a replacement dwelling under 1.1375(1)(q). Suggested offer: open about $240K, aim $250K, contingent on county approval of a replacement dwelling and a septic inspection.",
       "sources": [
         {
-          "title": "Redfin listing",
-          "url": "https://www.redfin.com/OR/Seal-Rock/9500-NW-Lark-St-97376/home/134130041"
+          "title": "Lincoln County property record R517770",
+          "url": "https://propertyweb.co.lincoln.or.us/Property-Detail/PropertyQuickRefID/R517770/PartyQuickRefID/O220830"
+        },
+        {
+          "title": "Lincoln County Code Chapter 1 (land use code; T-C is 1.1375)",
+          "url": "https://www.co.lincoln.or.us/DocumentCenter/View/647/Land-Use-Code-PDF"
+        },
+        {
+          "title": "Lincoln County v. Hetzler (RVs and yurts in T-C)",
+          "url": "https://yachatsnews.com/wp-content/uploads/2023/10/LincolnCounty.V.Hetzler.pdf"
         },
         {
           "title": "Zillow listing",
           "url": "https://www.zillow.com/homedetails/9500-NW-Lark-St-Seal-Rock-OR-97376/84122255_zpid/"
-        },
-        {
-          "title": "Lincoln County property search",
-          "url": "https://propertyweb.co.lincoln.or.us/Home"
         }
       ],
-      "updated": "2026-10-27"
+      "updated": "2026-10-27",
+      "rv": "no"
     }
   },
   "areas": [
