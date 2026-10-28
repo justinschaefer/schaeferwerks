@@ -1,4 +1,106 @@
 {
-  "listings": {},
-  "areas": []
+  "listings": {
+    "14765181": {
+      "rv": "limited",
+      "tags": ["Water + sewer at street", "LIDs paid", "Flat, 2.8% slope", "No STR in R1"],
+      "note": "City of Ocean Shores, zoned R1. Parcel 094100903600, 9,104 sq ft. County land value $22,550 vs $25,000 ask; last sold $29,900 in 2005. City water, sewer and power in the street; listing says LIDs paid in full. Taxes about $141/yr, no HOA.\n\nLiDAR (USGS 3DEP, 2019): basically flat, 2.8% overall, falling gently NE. Small dune hummocks. Ground only 10-15 ft above sea level.\n\nRV: up to 120 cumulative days a year on a 'semideveloped' lot (code says a vacant lot 'with power, water and sewer'), 90 days on an undeveloped lot. The cap is per person across every lot you own in the city. Up to 2 RVs, free online camping permit before each placement, self-contained or hooked to sewer (no porta-potty). An RV parked after 10 p.m. counts as a day. Tent only alongside an RV, max 100 sq ft. With a building permit, 6 months of RV living during construction, once per person ever. No renting the lot.\n\nShort-term rentals: only in B-1 and B-2 zones, not R1. Trees and grading: clearing vegetation or grading needs a city clearing and grading permit; removing soil below 18 in above road centerline needs a conditional use permit.\n\nShed with no house: one shed up to 120 sq ft ($75 nonaccessory structure application), no power or plumbing, 5 ft from side and rear lines. Tiny house on wheels counts as an RV even if hooked up. An L&I-insignia factory-built tiny home on a foundation should count as a house (modular homes are treated as site-built). Hookup fees from city code: about $3.4K-6.4K for water and sewer.\n\nHazards: FEMA Zone X. A mapped freshwater marsh (NWI) is about 30 ft from the lot line, which can trigger the city's wetland review and buffer. Whole town is in the Cascadia tsunami zone (2018 state models).\n\nSuggested offer: open $18-19K, aim for $20-22K, with a 30-day feasibility period for the wetland buffer.",
+      "sources": [
+        {"title": "Ocean Shores Municipal Code", "url": "https://ecode360.com/OC4569"},
+        {"title": "Ocean Shores licenses and fees", "url": "https://www.osgov.com/community/licenses___fees.php"},
+        {"title": "WA L&I tiny homes", "url": "https://lni.wa.gov/licensing-permits/manufactured-modular-mobile-structures/tiny-homes/"},
+        {"title": "KNKX: new SW Washington tsunami maps", "url": "https://www.knkx.org/news/2018-03-28/new-tsunami-maps-for-southwest-washington-coast-have-shocking-flooding"}
+      ],
+      "updated": "2026-10-23"
+    },
+    "195117826": {
+      "rv": "limited",
+      "tags": ["98% mapped wetland", "Peat soil", "Well + septic needed", "Pass"],
+      "note": "Unincorporated Pacific County, zoned R-R. Parcel 74067004006: two platted lots, about 22,700 sq ft total. County land value $20,000 vs $25,000 ask; most of the block is $10K vacant lots. Zillow's map pin is on the wrong lot (3100 102nd St). Power in the street; no sewer, no water.\n\nLiDAR (2019): dead flat, 0.2%, 12-15 ft above sea level.\n\nThe problem: the federal wetland map (NWI) puts about 98% of the lot inside a 14-acre forested wetland, with 31- and 43-acre wetlands within about 60 ft. Soil is Seastrand mucky peat, very poorly drained, with the wet-season water table about 6 in down; septic rated very limited. County wetland code (Ord. 193) gives interdunal wetlands over 1 acre buffers of 75-300 ft, so the only path is a reasonable use exception: about 3,000 sq ft of disturbance for house, septic and landscaping plus a driveway up to 600 sq ft, with a paid critical-area report and mitigation plan.\n\nRV (Ord. 194): one RV at a time, kept licensed and movable, never a permanent dwelling. More than 7 days in a row or 30 days a year needs sewer or approved septic, which can be waived with pumper or dump-station receipts. Up to 1 year during construction with an active building permit. Tents banned on vacant R-R lots except with temporary RV use. One temporary shed up to 120 sq ft. Short-term rentals allowed in R-R with conditions.\n\nVerdict: pass, or worth it only under about $10K as an RV-and-dump-station camp spot.",
+      "sources": [
+        {"title": "Pacific County ordinances (Ord. 193 critical areas, Ord. 194 zoning)", "url": "https://www.co.pacific.wa.us/ordres/index.htm"},
+        {"title": "Zillow listing", "url": "https://www.zillow.com/homedetails/0-102nd-Pl-X-Long-Beach-WA-98631/448673309_zpid/"}
+      ],
+      "updated": "2026-10-23"
+    },
+    "203503596": {
+      "rv": "limited",
+      "tags": ["Asking 35% under assessed", "Full-time RV once septic in", "STR allowed", "Septic is the risk"],
+      "note": "Unincorporated Grays Harbor County, zoned R-3 Resort Residential (listing's 'Jurisdiction: City' is wrong). Parcel 750507100000, 6,098 sq ft corner lot in Haven by the Sea. County land value $40,171 vs $25,999 ask (cut from $31,999 on 8/27/2026). Water and power in the street, no sewer.\n\nLiDAR (2009): flat, 1.1%, 15-18 ft above sea level. No mapped wetland on the lot (nearest pond about 375 ft). FEMA Zone X.\n\nRV: county code 8.20 authorizes 2 RVs or other camping on a private lot when it has sanitary facilities approved by the health authority. The county RV brochure says full-time RV living is OK with an approved septic (2-bedroom minimum) and legal water. Before septic: 14 consecutive days within any 2-month period, self-contained or serviced porta-potty, keep dump receipts. No renting the RV; covers, decks and sheds need permits.\n\nHouse allowed outright; the lot is under the 7,200 sq ft minimum but code 17.72.070 treats a lot of record as conforming. Short-term rentals are a permitted use in R-3 with an annual county STR permit. No county tree-cutting permit found in zoning.\n\nSeptic is make-or-break: Yaquina loamy fine sand, somewhat poorly drained, wet-season water table about 12 in, rated very limited. State rules want 13,000+ sq ft on public water; smaller lots of record qualify only if the design meets every rule with no waivers. Corner lot means 25 ft front setbacks on both streets, so house plus drainfield must fit in roughly 25 x 65 ft. Ask for the Haven by the Sea CC&Rs. Likely in the Cascadia tsunami zone (not confirmed for this lot).\n\nSuggested offer: open about $20K, aim for $22-24K, contingent on a septic designer's soil evaluation.",
+      "sources": [
+        {"title": "Grays Harbor County Code (8.20, 17.36, 17.64, 17.72)", "url": "https://library.municode.com/wa/grays_harbor_county/codes/code_of_ordinances"},
+        {"title": "Grays Harbor County RV brochure", "url": "https://www.graysharbor.gov/media/reeihdru/rv-brochure.pdf"},
+        {"title": "Grays Harbor County short-term rentals", "url": "https://www.graysharbor.gov/departments/planning-building/short-term-rentals/"},
+        {"title": "WAC 246-272A-0320 septic minimum land area", "url": "https://app.leg.wa.gov/wac/default.aspx?cite=246-272A-0320"}
+      ],
+      "updated": "2026-10-23"
+    },
+    "196138962": {
+      "rv": "limited",
+      "tags": ["Asking half of assessed", "Up to 2 dwellings", "Well + septic needed", "No wetland"],
+      "note": "Unincorporated Pacific County, zoned R-R (per the state's prototype zoning atlas; confirm). Parcel 75015010011: two 50 x 100 ft lots plus 30 ft of road. County land value $60,000 vs $29,900 ask. On market since 6/2025; went pending Jan 2026 and fell through. Taxes about $492/yr. Power in the street; no sewer, no water.\n\nLiDAR (2009/2019): not 'mostly level'. Overall 6% falling NW, but a dune trough about 10 ft deep runs N-S through the west-middle; median local slope 19%, some spots 30-45%. Elevation 19-31 ft. Flattest building ground is the east ridge (about 29-31 ft) and the south end.\n\nSoil: Netarts fine sand, well drained, no water table found; septic rated very limited because sand drains fast (usually solvable with pressure distribution). Nearest wetland about 525 ft away, beyond the largest 300 ft county buffer. FEMA Zone X. Tsunami not confirmed.\n\nZoning (Ord. 194): one house per lot of record, or two houses or a duplex. Old lots are exempt from the current minimum lot size. RV: one at a time, licensed and movable, not a permanent dwelling; more than 7 days in a row or 30 days a year needs septic unless waived with pumper or dump receipts; up to 1 year during construction with a building permit. Tent only alongside temporary RV use. One temporary shed up to 120 sq ft. Short-term rentals allowed in R-R but must be 300 ft from any other vacation rental (no variance), with posted and mailed notice, parking for each bedroom (2 minimum) and a septic inspection. No tree or clearing permit found in county zoning.\n\nMake-or-break: state rules require 100 ft between a drainfield and any well, including neighbors'. On 100 x 100 ft that likely means well and drainfield in opposite corners, depending on neighbors' systems.\n\nSuggested offer: open about $22K, aim for $24-26K, contingent on a septic designer's site plan showing well and drainfield fit.",
+      "sources": [
+        {"title": "Pacific County ordinances (Ord. 193, Ord. 194)", "url": "https://www.co.pacific.wa.us/ordres/index.htm"},
+        {"title": "WA Commerce State Zoning Atlas (prototype)", "url": "https://services6.arcgis.com/tboeqGwETr5ppr5Q/arcgis/rest/services/WAZA_Prototype_Layers/FeatureServer"},
+        {"title": "WAC 246-272A-0210 septic setbacks", "url": "https://app.leg.wa.gov/wac/default.aspx?cite=246-272A-0210"},
+        {"title": "Zillow listing", "url": "https://www.zillow.com/homedetails/285-Xx-Z-St-Ocean-Park-WA-98640/453559528_zpid/"}
+      ],
+      "updated": "2026-10-23"
+    },
+    "200115486": {
+      "rv": "no",
+      "tags": ["County codes it unbuildable", "No RV or tent without a house"],
+      "note": "City of Newport. Asking $37,500; the county codes the lot 'unbuildable' with a real market value of $1,050. No tent or RV living without a house (Newport code 14.16.020(B) and 14.06.050). Trees fall under the geologic hazard exemption: under 8 in diameter is free, and no more than 25% of the canopy per year.",
+      "sources": [],
+      "updated": "2026-10-21"
+    },
+    "198986077": {
+      "tags": ["35% average slope", "Level bench mid-lot", "No STR in RM"],
+      "note": "City of Lincoln City, zoned RM. Asking $35,000. LiDAR: 35% average slope, with a level bench mid-lot. Building permits about $2.5-2.9K; system development charges and hookups about $20K. No short-term rentals in RM. Trees 6 in and larger need a permit.\n\nSuggested offer: open $26K, target $29-31K.",
+      "sources": [],
+      "updated": "2026-10-21"
+    },
+    "134333814": {
+      "rv": "limited",
+      "tags": ["About 2 acres under 20% slope", "Kraft mill 1.5 mi", "Septic very limited"],
+      "note": "Unincorporated Lincoln County, zoned R-1, inside the Toledo urban growth boundary. About 2 acres under 20% slope. No county tree permit. RV allowed only during construction (1 year). Can't partition (5-acre minimum inside the growth boundary). Excavating or filling is a conditional use in R-1.\n\nGeorgia-Pacific kraft mill is about 1.5 mi south; Oregon DEQ fined it $116K in 2025. Wetlands 457-720 ft away. Soil has bedrock at 20-60 in; septic rated very limited.",
+      "sources": [
+        {"title": "Lincoln County property records", "url": "https://propertyweb.co.lincoln.or.us"}
+      ],
+      "updated": "2026-10-21"
+    }
+  },
+  "areas": [
+    {
+      "city": "Ocean Shores",
+      "state": "WA",
+      "rv": "limited",
+      "note": "City of Ocean Shores (code chapter 15.12): RV camping on a vacant lot is capped at 90 days a year, or 120 days on a 'semideveloped' lot with power, water and sewer. The cap is per person across every lot you own in the city. Up to 2 RVs, free online camping permit before each placement, self-contained or hooked to sewer. Tent only with an RV. 6 months in an RV during construction with a building permit, once per person ever. Short-term rentals only in B-1 and B-2 zones. One shed up to 120 sq ft allowed on a vacant lot ($75 application, no power or plumbing).",
+      "sources": [
+        {"title": "Ocean Shores Municipal Code", "url": "https://ecode360.com/OC4569"},
+        {"title": "Ocean Shores licenses and fees", "url": "https://www.osgov.com/community/licenses___fees.php"}
+      ],
+      "updated": "2026-10-23"
+    },
+    {
+      "city": "Copalis Beach",
+      "state": "WA",
+      "rv": "limited",
+      "note": "Unincorporated Grays Harbor County (code 8.20): up to 2 RVs or other camping on a private lot once it has health-approved sanitary facilities; the county brochure says full-time RV living is OK with an approved 2-bedroom septic and legal water. Without septic: 14 consecutive days within any 2-month period. Short-term rentals allowed with an annual county permit in G-1, G-5, R-2, R-3, RR, LQ and C-2.",
+      "sources": [
+        {"title": "Grays Harbor County RV brochure", "url": "https://www.graysharbor.gov/media/reeihdru/rv-brochure.pdf"},
+        {"title": "Grays Harbor County short-term rentals", "url": "https://www.graysharbor.gov/departments/planning-building/short-term-rentals/"}
+      ],
+      "updated": "2026-10-23"
+    },
+    {
+      "city": "Ocean Park",
+      "state": "WA",
+      "rv": "limited",
+      "note": "Unincorporated Pacific County (Ord. 194, section 21.I): one RV at a time, kept licensed and movable, never a permanent dwelling. More than 7 days in a row or 30 days a year needs sewer or approved septic, waivable with pumper or dump-station receipts. Up to 1 year during construction with an active building permit. Tents banned on vacant lots in R-1, R-2, R-3, R-R, MU and C-C except with temporary RV use. New vacation rentals are prohibited in R-1; in R-2 and R-R they must be 300 ft from any other vacation rental.",
+      "sources": [
+        {"title": "Pacific County Ord. 194 zoning", "url": "https://www.co.pacific.wa.us/ordres/index.htm"}
+      ],
+      "updated": "2026-10-23"
+    }
+  ]
 }
