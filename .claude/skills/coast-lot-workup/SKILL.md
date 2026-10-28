@@ -108,6 +108,9 @@ Before committing:
 - Never edit `data.json`. The daily job rewrites it.
 ## 8. Notes from the MacBook Pro (2026-10-27)
 
+- Safari JavaScript is on (2026-10-27). `~/LandScout/tools/sjs.sh SLOT URL WAIT 'js'` loads a page in Claude's Safari window and returns the JS result (URL `-` reuses the tab); use it for county search forms. `swift ~/LandScout/tools/pdftext.swift file.pdf` extracts PDF text.
+- Assessors: Lincoln `propertyweb.co.lincoln.or.us` (search box takes `12-11-30-CC-00301-00`; detail page lists zoning, RMV, sales, bills). Tillamook `query.co.tillamook.or.us/PSO/search?searchOption=Map&searchValue=4S1030AA%2000200` (space before the 5-digit lot).
+- Lincoln County land use code (Chapter 1) PDF: `https://www.co.lincoln.or.us/DocumentCenter/View/647/Land-Use-Code-PDF` (curl works).
 - Browser: `~/rv-search/fetch_pool.py` loads pages in Claude's own Safari window and saves the HTML (never touch the user's tabs). Zillow's `__NEXT_DATA__` comes through this way. In-page JavaScript (PDFs, search forms) needs Safari's "Allow JavaScript from Apple Events" setting.
 - Tsunami (OR) quick check: `https://gis.dogami.oregon.gov/arcgis/rest/services/Tsunami/XXL1_Flow_Depth_Ft/ImageServer/identify?geometry=LON,LAT&geometryType=esriGeometryPoint&sr=4326&f=json` (NoData = outside).
 - SLIDO layers: 11 = deposits, 2 = scarps, 1 = historic points (layer 4 no longer exists).
