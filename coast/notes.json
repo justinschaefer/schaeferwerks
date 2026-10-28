@@ -143,6 +143,39 @@
         }
       ],
       "updated": "2026-10-21"
+    },
+    "183463933": {
+      "rv": "limited",
+      "tags": [
+        "Steep: 29% average slope",
+        "Flat bench on north edge",
+        "Public water, septic needed",
+        "Asking $127K/acre"
+      ],
+      "note": "Unincorporated Tillamook County, Pacific City/Woods, zoned PCW-R2 (medium-density residential). Tax lot 4S1030AA00200, about 60,000 sq ft (1.38 acres). Listed $175,000, 123 days on market, last sold Feb 2023; owner lives in Valley Center, CA. Listing says public water, septic needed. County assessed value not checked (assessor site blocked automated reads).\n\nLiDAR (USGS 3DEP, 2009): not a level lot. Overall 29% slope falling SE (bearing 134) toward the river; local slope median 33%, 90th percentile 58%, max 72%. Elevation 51-135 ft. The only gentle ground is the top (north) edge at about 123-134 ft, roughly a 100 x 60 ft bench; everything below drops steeply. Building and drainfield would have to share that bench.\n\nHazards: FEMA Zone X. No mapped wetland on the lot; tidal Nestucca River (NWI riverine) about 160 ft away, small seasonal creeks about 130 ft away (county riparian setback along the Nestucca is 50 ft). DOGAMI SLIDO shows a prehistoric shallow earth-flow landslide nearby but not touching the lot. At 51+ ft elevation and per the listing it is outside the tsunami zone (not confirmed against DOGAMI maps).\n\nSoil: Fendall-Munsoncreek complex (SSURGO map unit 121D, about 18% typical slope, capability class 6e: erosion-limited). The USDA septic rating couldn't be pulled (soil database was down); slope alone makes septic hard here.\n\nRules: PCW-R2 allows one- or two-family dwellings outright and lists temporary construction trailers or RVs as an outright use. County LUO 5.010 requires a placement permit before any RV goes on a lot; during construction the RV must be unhooked and stored or removed within 30 days after the building permit closes. Living in an RV on the vacant lot without a building permit was not found as allowed; a 2018 LUBA ruling read county code as limiting RVs to non-residential vacation use. The zone's stated purpose assumes public sewer, which this lot lacks.\n\nShort-term rentals: county STR license cap. West of the Nestucca (Alder St south to Bob Straub) is cap-free since Jan 2025; the rest of Pacific City/Woods is capped at 95 licenses. This lot sits inside a river bend, so which side it falls on isn't confirmed.\n\nVerdict: a view lot, not a camp spot. Make-or-break is fitting house plus septic on the small north bench of a 29% slope, near an old landslide. Suggested offer: open about $140K, aim $150-155K, contingent on a septic site evaluation and a geotechnical look at the slope.",
+      "sources": [
+        {
+          "title": "Tillamook County PCW-R2 zone (LUO 3.333)",
+          "url": "https://www.tillamookcounty.gov/sites/default/files/fileattachments/community_development/page/27173/section_3.333_pcw-r2_pacific_city_woods_medium_density_residetial.pdf"
+        },
+        {
+          "title": "Tillamook County LUO Article 5 (5.010 RV siting)",
+          "url": "https://www.tillamookcounty.gov/sites/default/files/fileattachments/community_development/page/104106/article_5_add_middle_housing.pdf"
+        },
+        {
+          "title": "LUBA: Oregon Coast Reliance v. Tillamook County (2018)",
+          "url": "https://wlo.willamette.edu/orluba/2018/02/oregon-coast-reliance-v.-tillamook-county.html"
+        },
+        {
+          "title": "Headlight Herald: STR cap-exempt zone in Pacific City",
+          "url": "https://www.tillamookheadlightherald.com/news/commissioners-create-str-cap-exemption-zone-in-pacific-city/article_df043c0e-cf7a-11ef-bc24-e3bb6ce94f23.html"
+        },
+        {
+          "title": "Redfin listing",
+          "url": "https://www.redfin.com/OR/Pacific-City/TL-200-Reddekopp-Rd-97135/home/183463933"
+        }
+      ],
+      "updated": "2026-10-27"
     }
   },
   "areas": [
