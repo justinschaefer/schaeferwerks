@@ -23,7 +23,7 @@ schaeferwerks.com/rv lists used trailers for sale that the Jeep can tow. This fi
 - Only Justin's models (`MODELS`) and the well-built brands are listed; anything else the broad searches find is dropped,
   as is any ad without a price.
   Trailers that aren't toy haulers are listed only from the approved brands: Airstream, Wolf Pup, R-Pod, Lance and the
-  well-built brands. Geo Pros / E-Pros are listed only as toy haulers.
+  well-built brands, and only within 250 miles of Portland (`NEAR_MILES`); toy haulers and Airstreams from anywhere. Geo Pros / E-Pros are listed only as toy haulers.
 - The top model is the Rockwood Geo Pro G19FBTH (and its twin, the Flagstaff E-Pro E19FBTH): `TOP_MODEL` in rvscout.py.
   Its siblings, the Rockwood 19FS and the Geo Pro / E-Pro 19TH toy haulers, are targets too (the page's
   Geo Pro toy haulers button shows all three). It's searched nationwide; one that fits, is within budget and within 600 miles is always a top pick.
